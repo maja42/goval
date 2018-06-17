@@ -9,8 +9,6 @@ import (
 
 //go:generate goyacc.exe -o parser.go parser.go.y
 
-// TODO: error cases testen!
-
 func Test_Literals(t *testing.T) {
 	assertEvaluation(t, nil, true, "true")
 	assertEvaluation(t, nil, false, "false")
@@ -121,6 +119,10 @@ func Test_Arithmetic_Add(t *testing.T) {
 func Test_Add_WithUnaryMinus(t *testing.T) {
 	assertEvaluation(t, nil, 21, "42 + -21")
 	assertEvaluation(t, nil, 2.1, "4.2 + -2.1")
+
+	assertEvaluation(t, nil, -1, "-4+3")
+	assertEvaluation(t, nil, -1, "(-4)+3")
+	assertEvaluation(t, nil, -7, "-(4+3)")
 }
 
 func Test_Add_IncompatibleTypes(t *testing.T) {
@@ -145,7 +147,6 @@ func Test_Add_IncompatibleTypes(t *testing.T) {
 
 func Test_UnaryMinus(t *testing.T) {
 	vars := getTestVars()
-
 	assertEvaluation(t, vars, -42, "-42")
 	assertEvaluation(t, vars, -4.2, "-4.2")
 	assertEvaluation(t, vars, -42.0, "-42.0")
@@ -291,6 +292,33 @@ func Test_Literals_Parenthesis(t *testing.T) {
 	assertEvaluation(t, nil, 4.2, "(4.2)")
 
 	assertEvaluation(t, nil, "text", `("text")`)
+}
+
+func Test_And(t *testing.T) {
+	assertEvaluation(t, nil, false, "false && false")
+	assertEvaluation(t, nil, false, "false && true")
+	assertEvaluation(t, nil, false, "true && false")
+	assertEvaluation(t, nil, true, "true && true")
+
+	assertEvaluation(t, nil, false, "true && false && true")
+}
+
+func Test_Or(t *testing.T) {
+	assertEvaluation(t, nil, false, "false || false")
+	assertEvaluation(t, nil, true, "false || true")
+	assertEvaluation(t, nil, true, "true || false")
+	assertEvaluation(t, nil, true, "true || true")
+
+	assertEvaluation(t, nil, true, "true || false || true")
+}
+
+// TODO: wrong-type-for-and tests
+// TODO: wrong-type-for-or tests
+
+func Test_AndOr_Order(t *testing.T) {
+	// AND has precedes over OR
+	assertEvaluation(t, nil, true, "true || false && false")
+	assertEvaluation(t, nil, true, "false && false || true")
 }
 
 func Test_VariableAccess_Simple(t *testing.T) {

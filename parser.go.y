@@ -18,17 +18,21 @@ package main
 %type<expr> logic
 %type<expr> varAccess
 
-%token<token> LITERAL_BOOL // true false
+%token<token> LITERAL_BOOL   // true false
 %token<token> LITERAL_NUMBER // 42 4.2 4e2 4.2e2
 %token<token> LITERAL_STRING // "text" 'text'
 %token<token> IDENT
+%token<token> AND            // &&
+%token<token> OR             // ||
 
-%left '!'
-%left '+' '-'
-%left '*' '/'
+/* Operator precedence is taken from c: http://en.cppreference.com/w/c/language/operator_precedence */
 
-%left '.'
-%left '[' ']'
+%left  OR
+%left  AND
+%left  '+' '-'
+%left  '*' '/'
+%right '!'
+%left  '.' '[' ']'
 
 %%
 
@@ -55,7 +59,7 @@ literal
   ;
 
 math
-  : '-' expr              { $$ = unaryMinus($2)  }
+  : '-' expr %prec  '*'   { $$ = unaryMinus($2)  }  /* unary minus has higher precedence */
   | expr '+' expr         { $$ = add($1, $3) }
   | expr '-' expr         { $$ = sub($1, $3) }
   | expr '*' expr         { $$ = mul($1, $3) }
@@ -63,7 +67,9 @@ math
   ;
 
 logic
-  : '!' expr                { $$ = !asBool($2) }
+  : '!' expr              { $$ = !asBool($2) }
+  | expr AND expr         { $$ = asBool($1) && asBool($3) }
+  | expr OR expr          { $$ = asBool($1) || asBool($3) }
 
 varAccess
   : IDENT                   { $$ = accessVar(yylex.(*Lexer).variables, $1.literal) }

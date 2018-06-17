@@ -98,6 +98,12 @@ func (l *Lexer) Lex(lval *yySymType) int {
 	case token.NOT:
 		tokenType = int(tok.String()[0])
 
+	case token.LAND:
+		tokenType = AND
+
+	case token.LOR:
+		tokenType = OR
+
 		// Variables
 
 	case token.IDENT:
