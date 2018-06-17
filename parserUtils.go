@@ -174,10 +174,22 @@ func div(val1 interface{}, val2 interface{}) interface{} {
 	panic(fmt.Errorf("type error: cannot divide type %s and %s", typeOf(val1), typeOf(val2)))
 }
 
+func unaryMinus(val interface{}) interface{} {
+	intVal, ok := val.(int)
+	if ok {
+		return -intVal
+	}
+	floatVal, ok := val.(float64)
+	if ok {
+		return -floatVal
+	}
+	panic(fmt.Errorf("type error: unary minus requires number, but was %s", typeOf(val)))
+}
+
 func accessVar(variables map[string]interface{}, varName string) interface{} {
 	val, ok := variables[varName]
 	if !ok {
-		panic(fmt.Errorf("eval error: variable %q does not exist", varName))
+		panic(fmt.Errorf("var error: variable %q does not exist", varName))
 	}
 	return val
 }
@@ -191,7 +203,7 @@ func accessField(s interface{}, field interface{}) interface{} {
 		}
 		val, ok := obj[key]
 		if !ok {
-			panic(fmt.Errorf("eval error: object has no member %q", field))
+			panic(fmt.Errorf("var error: object has no member %q", field))
 		}
 		return val
 	}
@@ -211,7 +223,7 @@ func accessField(s interface{}, field interface{}) interface{} {
 		}
 
 		if intIdx < 0 || intIdx >= len(arrVar) {
-			panic(fmt.Errorf("eval error: array index %d is out of range [%d, %d]", intIdx, 0, len(arrVar)))
+			panic(fmt.Errorf("var error: array index %d is out of range [%d, %d]", intIdx, 0, len(arrVar)))
 		}
 		return arrVar[intIdx]
 	}

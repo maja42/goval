@@ -114,9 +114,9 @@ func (l *Lexer) Lex(lval *yySymType) int {
 	case token.PERIOD:
 		tokenType = int('.')
 
-	case token.LBRACK, token.RBRACK:
+	case token.LBRACK, token.RBRACK,
+		token.LPAREN, token.RPAREN:
 		tokenType = int(tok.String()[0])
-
 
 	default:
 		l.Perrorf(pos, "unknown token %q (%q)", tok.String(), lit)

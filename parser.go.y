@@ -23,10 +23,11 @@ package main
 %token<token> LITERAL_STRING // "text" 'text'
 %token<token> IDENT
 
-%left '+' '-' '*' '/'
 %left '!'
-%left '.'
+%left '+' '-'
+%left '*' '/'
 
+%left '.'
 %left '[' ']'
 
 %%
@@ -44,17 +45,18 @@ expr
   | math
   | logic
   | varAccess
+  | '(' expr ')'          { $$ = $2 }
   ;
 
 literal
   : LITERAL_BOOL          { $$ = $1.value }
   | LITERAL_NUMBER        { $$ = $1.value }
-  | '-' LITERAL_NUMBER    { $$ = sub(0, $2.value) }
   | LITERAL_STRING        { $$ = $1.value }
   ;
 
 math
-  : expr '+' expr         { $$ = add($1, $3) }
+  : '-' expr              { $$ = unaryMinus($2)  }
+  | expr '+' expr         { $$ = add($1, $3) }
   | expr '-' expr         { $$ = sub($1, $3) }
   | expr '*' expr         { $$ = mul($1, $3) }
   | expr '/' expr         { $$ = div($1, $3) }

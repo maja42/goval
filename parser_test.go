@@ -40,15 +40,6 @@ func Test_LiteralsOutOfRange(t *testing.T) {
 	assertEvalError(t, nil, "parse error: cannot parse float at position 1", "9.9e999")
 }
 
-func Test_UnaryMinusLiterals(t *testing.T) {
-	assertEvaluation(t, nil, -42, "-42")
-
-	assertEvaluation(t, nil, -4.2, "-4.2")
-	assertEvaluation(t, nil, -42.0, "-42.0")
-	assertEvaluation(t, nil, -42.0, "-4.2e1")
-	assertEvaluation(t, nil, -400.0, "-4e2")
-}
-
 func Test_MissingOperator(t *testing.T) {
 	assertEvalError(t, nil, "syntax error: unexpected LITERAL_BOOL", "true false")
 	assertEvalError(t, nil, "syntax error: unexpected '!'", "true!")
@@ -59,13 +50,13 @@ func Test_MissingOperator(t *testing.T) {
 }
 
 func Test_InvalidLiterals(t *testing.T) {
-	assertEvalError(t, nil, "eval error: variable \"bool\" does not exist", "bool")
+	assertEvalError(t, nil, "var error: variable \"bool\" does not exist", "bool")
 	assertEvalError(t, nil, "syntax error: unexpected LITERAL_NUMBER", `4.2.0`)
 	assertEvalError(t, nil, "unknown token \"CHAR\" (\"'t'\") at position 1", `'t'`)
 	assertEvalError(t, nil, "unknown token \"CHAR\" (\"'text'\") at position 1", `'text'`)
 	assertEvalError(t, nil, "parse error: cannot unquote string literal at position 1", `"`)
 	assertEvalError(t, nil, "parse error: cannot unquote string literal at position 1", `"text`)
-	assertEvalError(t, nil, "eval error: variable \"text\" does not exist", `text"`)
+	assertEvalError(t, nil, "var error: variable \"text\" does not exist", `text"`)
 }
 
 func Test_Bool_Not(t *testing.T) {
@@ -79,6 +70,9 @@ func Test_Bool_Not(t *testing.T) {
 	// via variables:
 	assertEvaluation(t, vars, false, "!tr")
 	assertEvaluation(t, vars, true, "!fl")
+
+	assertEvaluation(t, vars, true, "(!(!(true)))")
+	assertEvaluation(t, vars, false, "(!(!(false)))")
 }
 
 func Test_Bool_Not_NotApplicable(t *testing.T) {
@@ -151,20 +145,28 @@ func Test_Add_IncompatibleTypes(t *testing.T) {
 
 func Test_UnaryMinus(t *testing.T) {
 	vars := getTestVars()
+
 	assertEvaluation(t, vars, -42, "-42")
 	assertEvaluation(t, vars, -4.2, "-4.2")
+	assertEvaluation(t, vars, -42.0, "-42.0")
+	assertEvaluation(t, vars, -42.0, "-4.2e1")
+	assertEvaluation(t, vars, -400.0, "-4e2")
+
+	assertEvaluation(t, vars, -42, "-int")
+	assertEvaluation(t, vars, -4.2, "-float")
+
+	assertEvaluation(t, vars, -42, "(-(42))")
+	assertEvaluation(t, vars, -4.2, "(-(4.2))")
 }
 
 func Test_UnaryMinus_IncompatibleTypes(t *testing.T) {
 	vars := getTestVars()
-	assertEvalError(t, vars, "syntax error: unexpected LITERAL_BOOL, expecting LITERAL_NUMBER", "-true")
-	assertEvalError(t, vars, "syntax error: unexpected LITERAL_BOOL, expecting LITERAL_NUMBER", "-false")
-	assertEvalError(t, vars, "syntax error: unexpected LITERAL_STRING, expecting LITERAL_NUMBER", `-"0"`)
+	assertEvalError(t, vars, "type error: unary minus requires number, but was bool", "-true")
+	assertEvalError(t, vars, "type error: unary minus requires number, but was bool", "-false")
+	assertEvalError(t, vars, "type error: unary minus requires number, but was string", `-"0"`)
 
-	assertEvalError(t, vars, "syntax error: unexpected IDENT, expecting LITERAL_NUMBER", "-int")
-	assertEvalError(t, vars, "syntax error: unexpected IDENT, expecting LITERAL_NUMBER", "-float")
-	assertEvalError(t, vars, "syntax error: unexpected IDENT, expecting LITERAL_NUMBER", `-arr`)
-	assertEvalError(t, vars, "syntax error: unexpected IDENT, expecting LITERAL_NUMBER", `-obj`)
+	assertEvalError(t, vars, "type error: unary minus requires number, but was array", `-arr`)
+	assertEvalError(t, vars, "type error: unary minus requires number, but was object", `-obj`)
 }
 
 func Test_Arithmetic_Subtract(t *testing.T) {
@@ -229,7 +231,7 @@ func Test_Arithmetic_Divide(t *testing.T) {
 	assertEvaluation(t, nil, 2.75, "5.5 / 2")
 
 	assertEvaluation(t, nil, 2, "144 / 12 / 6")
-	assertEvaluation(t, nil, 1.2 / 2.5 / 3, "1.2 / 2.5 / 3")
+	assertEvaluation(t, nil, 1.2/2.5/3, "1.2 / 2.5 / 3")
 }
 
 func Test_Arithmetic_InvalidTypes(t *testing.T) {
@@ -246,36 +248,66 @@ func Test_Arithmetic_InvalidTypes(t *testing.T) {
 				continue
 			}
 
-			// +
-			// tested separately
+			// + --> tested separately
 			// -
 			expectedErr := fmt.Sprintf("type error: cannot subtract type %s and %s", typ1, typ2)
-			assertEvalError(t, vars, expectedErr, t1 + "-" + t2)
+			assertEvalError(t, vars, expectedErr, t1+"-"+t2)
 			// *
 			expectedErr = fmt.Sprintf("type error: cannot multiply type %s and %s", typ1, typ2)
-			assertEvalError(t, vars, expectedErr, t1 + "*" + t2)
+			assertEvalError(t, vars, expectedErr, t1+"*"+t2)
 			// /
 			expectedErr = fmt.Sprintf("type error: cannot divide type %s and %s", typ1, typ2)
-			assertEvalError(t, vars, expectedErr, t1 + "/" + t2)
+			assertEvalError(t, vars, expectedErr, t1+"/"+t2)
 		}
 
 	}
+}
+
+func Test_Arithmetic_Order(t *testing.T) {
+	assertEvaluation(t, nil, 8, "2 + 2 * 3")
+	assertEvaluation(t, nil, 8, "2 * 3 + 2")
+
+	assertEvaluation(t, nil, 6, "4 + 8 / 4")
+	assertEvaluation(t, nil, 6, "8 / 4 + 4")
+}
+
+func Test_Arithmetic_Parenthesis(t *testing.T) {
+	assertEvaluation(t, nil, 8, "2 + (2 * 3)")
+	assertEvaluation(t, nil, 12, "(2 + 2) * 3")
+	assertEvaluation(t, nil, 8, "(2 * 3) + 2")
+	assertEvaluation(t, nil, 10, "2 * (3 + 2)")
+
+	assertEvaluation(t, nil, 6, "4 + (8 / 4)")
+	assertEvaluation(t, nil, 3, "(4 + 8) / 4")
+	assertEvaluation(t, nil, 6, "(8 / 4) + 4")
+	assertEvaluation(t, nil, 1, "8 / (4 + 4)")
+}
+
+func Test_Literals_Parenthesis(t *testing.T) {
+	assertEvaluation(t, nil, true, "(true)")
+	assertEvaluation(t, nil, false, "(false)")
+
+	assertEvaluation(t, nil, 42, "(42)")
+	assertEvaluation(t, nil, 4.2, "(4.2)")
+
+	assertEvaluation(t, nil, "text", `("text")`)
 }
 
 func Test_VariableAccess_Simple(t *testing.T) {
 	vars := getTestVars()
 	for key, val := range vars {
 		assertEvaluation(t, vars, val, key)
+		assertEvaluation(t, vars, val, "(" + key + ")")
 	}
 }
 
 func Test_VariableAccess_DoesNotExist(t *testing.T) {
-	assertEvalError(t, nil, "eval error: variable \"var\" does not exist", "var")
-	assertEvalError(t, nil, "eval error: variable \"varName\" does not exist", "varName")
+	assertEvalError(t, nil, "var error: variable \"var\" does not exist", "var")
+	assertEvalError(t, nil, "var error: variable \"varName\" does not exist", "varName")
 
-	assertEvalError(t, nil, "eval error: variable \"var\" does not exist", "var.field")
-	assertEvalError(t, nil, "eval error: variable \"var\" does not exist", "var[0]")
-	assertEvalError(t, nil, "eval error: variable \"var\" does not exist", "var[fieldName]")
+	assertEvalError(t, nil, "var error: variable \"var\" does not exist", "var.field")
+	assertEvalError(t, nil, "var error: variable \"var\" does not exist", "var[0]")
+	assertEvalError(t, nil, "var error: variable \"var\" does not exist", "var[fieldName]")
 }
 
 func Test_VariableAccess_Arithmetic(t *testing.T) {
@@ -296,10 +328,10 @@ func Test_VariableAccess_DotSyntax(t *testing.T) {
 
 func Test_VariableAccess_DotSyntax_DoesNotExist(t *testing.T) {
 	vars := getTestVars()
-	assertEvalError(t, vars, "eval error: object has no member \"key\"", "obj.key")
-	assertEvalError(t, vars, "eval error: object has no member \"key\"", "obj.key.field")
-	assertEvalError(t, vars, "eval error: object has no member \"key\"", "obj.key[0]")
-	assertEvalError(t, vars, "eval error: object has no member \"key\"", "obj.key[fieldName]")
+	assertEvalError(t, vars, "var error: object has no member \"key\"", "obj.key")
+	assertEvalError(t, vars, "var error: object has no member \"key\"", "obj.key.field")
+	assertEvalError(t, vars, "var error: object has no member \"key\"", "obj.key[0]")
+	assertEvalError(t, vars, "var error: object has no member \"key\"", "obj.key[fieldName]")
 }
 
 func Test_VariableAccess_DotSyntax_InvalidType(t *testing.T) {
@@ -318,6 +350,7 @@ func Test_VariableAccess_ArraySyntax(t *testing.T) {
 	// access object fields
 	for key, val := range vars["obj"].(map[string]interface{}) {
 		assertEvaluation(t, vars, val, `obj["`+key+`"]`)
+		assertEvaluation(t, vars, val, `obj[("`+key+`")]`)
 	}
 
 	// access array elements
@@ -325,20 +358,22 @@ func Test_VariableAccess_ArraySyntax(t *testing.T) {
 		strIdx := strconv.Itoa(idx)
 		// with int:
 		assertEvaluation(t, vars, val, `arr[`+strIdx+`]`)
+		assertEvaluation(t, vars, val, `arr[(`+strIdx+`)]`)
 		// with float:
 		assertEvaluation(t, vars, val, `arr[`+strIdx+`.0]`)
+		assertEvaluation(t, vars, val, `arr[(`+strIdx+`.0)]`)
 	}
 }
 
 func Test_VariableAccess_ArraySyntax_DoesNotExist(t *testing.T) {
 	vars := getTestVars()
-	assertEvalError(t, vars, "eval error: object has no member \"key\"", `obj["key"]`)
-	assertEvalError(t, vars, "eval error: object has no member \"key\"", `obj["key"].field`)
-	assertEvalError(t, vars, "eval error: object has no member \"key\"", `obj["key"][0]`)
-	assertEvalError(t, vars, "eval error: object has no member \"key\"", `obj["key"][fieldName]`)
+	assertEvalError(t, vars, "var error: object has no member \"key\"", `obj["key"]`)
+	assertEvalError(t, vars, "var error: object has no member \"key\"", `obj["key"].field`)
+	assertEvalError(t, vars, "var error: object has no member \"key\"", `obj["key"][0]`)
+	assertEvalError(t, vars, "var error: object has no member \"key\"", `obj["key"][fieldName]`)
 
-	assertEvalError(t, vars, "eval error: array index 5 is out of range [0, 4]", `arr[5]`)
-	assertEvalError(t, vars, "eval error: array index 6 is out of range [0, 4]", `arr[6]`)
+	assertEvalError(t, vars, "var error: array index 5 is out of range [0, 4]", `arr[5]`)
+	assertEvalError(t, vars, "var error: array index 6 is out of range [0, 4]", `arr[6]`)
 }
 
 func Test_VariableAccess_ArraySyntax_InvalidType(t *testing.T) {
