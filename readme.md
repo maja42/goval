@@ -85,6 +85,19 @@ false
 {"k" + "e" + "y": "value"}
 ```
 
+It is possible to access elements of literals:
+
+Examples:
+
+```
+[1, 2, 3][1]                // 2
+[1, [2, 3, 42][1][2]        // 42
+
+{"a": 1}.a                  // 1
+{"a": {"b": 42}}.a.b        // 42
+{"a": {"b": 42}}["a"]["b"]  // 42
+```
+
 # Precedence
 
 Operator precedence strictly follows [C/C++ rules](http://en.cppreference.com/w/cpp/language/operator_precedence).
@@ -100,31 +113,10 @@ Examples:
 
 # Operators
 
+
 ## Arithmetic
 
-### Addition, string, array and object concatenation `+`
-
-If either the left or right side is a `string`, a string concatenation is performed.
-Otherwise, both sides need to be numbers and will be added. If both sides are integers, the resulting value is
-also an integer. Otherwise, the result will be a floating point number. 
-
-Examples:
-
-```
-3 + 4           // 7
-3 + 4.0         // 7.0
-3.2 + 1.4       // 4.6
-
-"text" + 42     // "text42"
-42 + "text"     // "42text"
-"text" + true   // "texttrue"
-
-[0, 1] + [2, 3]                        // [0, 1, 2, 3]
-{"a": 1, "b": 2} + {"b": 3, "c": 4}    // {"a": 1, "b": 3, "c": 4}
-{"b": 3, "c": 4} + {"a": 1, "b": 2}    // {"a": 1, "b": 2, "c": 4}
-```
-
-### Arithmetic `-` `*` `/`
+### Arithmetic `+` `-` `*` `/`
 
 If both sides are integers, the resulting value is also an integer.
 Otherwise, the result will be a floating point number.
@@ -132,6 +124,7 @@ Otherwise, the result will be a floating point number.
 Examples:
 
 ```
+3 + 4               // 7
 2 + 2 * 3           // 8
 2 * 3 + 2.5         // 8.5
 12 - 7 - 5          // 0
@@ -152,6 +145,46 @@ Examples:
 1 + --1  // syntax error
 -(4+3)   // -7
 -varName
+```
+
+
+## Concatenation
+
+### String concatenation `+`
+
+If either the left or right side of the `+` operator is a `string`, a string concatenation is performed.
+Supports strings, numbers and booleans.
+
+Examples:
+
+```
+"text" + 42     // "text42"
+42 + "text"     // "42text"
+"text" + true   // "texttrue"
+```
+
+### Array concatenation `+`
+
+If both sides of the `+` operator are arrays, they are concatenated
+
+Examples:
+
+```
+[0, 1] + [2, 3]          // [0, 1, 2, 3]
+[0] + [1] + [[2]] + []   // [0, 1, [2]]
+```
+
+### Object concatenation `+`
+
+If both sides of the `+` operator are objects, their fields are combined into a new object.
+If both objects contain the same keys, the value of the right object will override those of the left.
+
+Examples:
+
+```
+{"a": 1} + {"b": 2} + {"c": 3}         // {"a": 1, "b": 2, "c": 3}
+{"a": 1, "b": 2} + {"b": 3, "c": 4}    // {"a": 1, "b": 3, "c": 4}
+{"b": 3, "c": 4} + {"a": 1, "b": 2}    // {"a": 1, "b": 2, "c": 4}
 ```
 
 ## Logic
