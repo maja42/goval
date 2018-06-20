@@ -37,15 +37,6 @@ func asBool(val interface{}) bool {
 	return b
 }
 
-// func asInt(val interface{}) bool {
-// 	i, ok := val.(int)
-// 	if !ok {
-// 		todo: cast float!
-// 		panic(fmt.Errorf("required bool, but was %v", val))
-// 	}
-// 	return i
-// }
-
 func add(val1 interface{}, val2 interface{}) interface{} {
 	str1, str1OK := val1.(string)
 	str2, str2OK := val2.(string)
@@ -184,6 +175,58 @@ func unaryMinus(val interface{}) interface{} {
 		return -floatVal
 	}
 	panic(fmt.Errorf("type error: unary minus requires number, but was %s", typeOf(val)))
+}
+
+func deepEqual(val1 interface{}, val2 interface{}) bool {
+	switch typ1 := val1.(type) {
+
+	case []interface{}:
+		typ2, ok := val2.([]interface{})
+		if !ok || len(typ1) != len(typ2) {
+			return false
+		}
+		for idx := range typ1 {
+			if !deepEqual(typ1[idx], typ2[idx]) {
+				return false
+			}
+		}
+		return true
+
+	case map[string]interface{}:
+		typ2, ok := val2.(map[string]interface{})
+		if !ok || len(typ1) != len(typ2) {
+			return false
+		}
+		for idx := range typ1 {
+			if !deepEqual(typ1[idx], typ2[idx]) {
+				return false
+			}
+		}
+		return true
+
+	case int:
+		int2, ok := val2.(int)
+		if ok {
+			return typ1 == int2
+		}
+		float2, ok := val2.(float64)
+		if ok {
+			return float64(typ1) == float2
+		}
+		return false
+
+	case float64:
+		float2, ok := val2.(float64)
+		if ok {
+			return typ1 == float2
+		}
+		int2, ok := val2.(int)
+		if ok {
+			return typ1 == float64(int2)
+		}
+		return false
+	}
+	return val1 == val2
 }
 
 func accessVar(variables map[string]interface{}, varName string) interface{} {

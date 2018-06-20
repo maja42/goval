@@ -312,20 +312,148 @@ func Test_Or(t *testing.T) {
 	assertEvaluation(t, nil, true, "true || false || true")
 }
 
-// TODO: wrong-type-for-and tests
-// TODO: wrong-type-for-or tests
-
 func Test_AndOr_Order(t *testing.T) {
 	// AND has precedes over OR
 	assertEvaluation(t, nil, true, "true || false && false")
 	assertEvaluation(t, nil, true, "false && false || true")
 }
 
+func Test_AndOr_InvalidTypes(t *testing.T) {
+	vars := getTestVars()
+	allTypes := []string{"true", "false", "42", "4.2", `"text"`, `"0"`, "arr", "obj"}
+	typeOfAllTypes := []string{"bool", "bool", "number", "number", "string", "string", "array", "object"}
+
+	for idx1, t1 := range allTypes {
+		for idx2, t2 := range allTypes {
+			typ1 := typeOfAllTypes[idx1]
+			typ2 := typeOfAllTypes[idx2]
+
+			if typ1 == "bool" && typ2 == "bool" {
+				continue
+			}
+
+			nonBoolType := typ1
+			if typ1 == "bool" {
+				nonBoolType = typ2
+			}
+
+			// and
+			expectedErr := fmt.Sprintf("type error: required bool, but was %s", nonBoolType)
+			assertEvalError(t, vars, expectedErr, t1+"&&"+t2)
+			// or
+			expectedErr = fmt.Sprintf("type error: required bool, but was %s", nonBoolType)
+			assertEvalError(t, vars, expectedErr, t1+"||"+t2)
+
+			result, err := evaluate(t1+"||"+t2, vars)
+			assert.Errorf(t, err, "%v || %v\n", t1, t2)
+			assert.Nil(t, result)
+		}
+
+	}
+}
+
+func assertEquality(t *testing.T, variables map[string]interface{}, equal bool, v1, v2 string) {
+	assertEvaluation(t, variables, equal, v1+"=="+v2)
+	assertEvaluation(t, variables, !equal, v1+"!="+v2)
+}
+
+func Test_Equality_Simple(t *testing.T) {
+	assertEquality(t, nil, true, "false", "false")
+	assertEquality(t, nil, true, "true", "true")
+	assertEquality(t, nil, false, "false", "true")
+
+	assertEquality(t, nil, true, "42", "42")
+	assertEquality(t, nil, false, "42", "41")
+	assertEquality(t, nil, false, "1", "-1")
+
+	assertEquality(t, nil, true, "4.2", "4.2")
+	assertEquality(t, nil, false, "4.2", "4.1")
+
+	assertEquality(t, nil, true, "42", "42.0")
+	assertEquality(t, nil, true, "42.0", "42")
+
+	assertEquality(t, nil, false, "42", "42.1")
+	assertEquality(t, nil, false, "42.1", "42")
+
+	assertEquality(t, nil, true, `""`, `""`)
+	assertEquality(t, nil, true, `"text"`, ` "text"`)
+	assertEquality(t, nil, true, `"text"`, ` "te" + "xt"`)
+
+	assertEquality(t, nil, false, `"text"`, ` "Text"`)
+	assertEquality(t, nil, false, `"0"`, ` 0`)
+	assertEquality(t, nil, false, `""`, ` 0`)
+}
+
+func Test_Equality_Arrays(t *testing.T) {
+	vars := map[string]interface{}{
+		"null":     nil,
+		"emptyArr": []interface{}{},
+
+		"arr1a": []interface{}{false, true, 42, 4.2, "text", []interface{}{34.0}, map[string]interface{}{"A": 45, "B": 1.2}},
+		"arr1b": []interface{}{false, true, 42.0, 4.2, "text", []interface{}{34}, map[string]interface{}{"B": 1.2, "A": 45}},
+
+		"arr2": []interface{}{[]interface{}{34.0}, map[string]interface{}{"A": 45, "B": 1.2}, false, true, 42, 4.2, "text"},
+		"arr3": []interface{}{false, true, 42, 4.2, "text"},
+		"arr4": []interface{}{false, true, 42, 4.2, ""},
+	}
+
+	assertEquality(t, vars, true, `emptyArr`, `emptyArr`)
+	assertEquality(t, vars, true, `arr1a`, `arr1a`)
+	assertEquality(t, vars, true, `arr1b`, `arr1b`)
+	assertEquality(t, vars, true, `arr2`, `arr2`)
+	assertEquality(t, vars, true, `arr3`, `arr3`)
+	assertEquality(t, vars, true, `arr4`, `arr4`)
+
+	assertEquality(t, vars, true, `arr1a`, `arr1b`)
+	assertEquality(t, vars, true, `arr1b`, `arr1b`)
+
+	assertEquality(t, vars, false, `arr1a`, `arr2`)
+	assertEquality(t, vars, false, `arr1a`, `arr3`)
+	assertEquality(t, vars, false, `arr2`, `arr3`)
+	assertEquality(t, vars, false, `arr3`, `arr4`)
+
+	assertEquality(t, vars, false, `emptyArr`, `null`)
+	assertEquality(t, vars, false, `emptyArr`, `0`)
+	assertEquality(t, vars, false, `emptyArr`, `arr1a`)
+	assertEquality(t, vars, false, `emptyArr`, `""`)
+}
+
+func Test_Equal_Objects(t *testing.T) {
+	vars := map[string]interface{}{
+		"null":     nil,
+		"emptyObj": map[string]interface{}{},
+
+		"obj1a": map[string]interface{}{"a": false, "b": true, "c": 42, "d": 4.2, "e": "text", "f": []interface{}{34.0}, "g": map[string]interface{}{"A": 45, "B": 1.2}},
+		"obj1b": map[string]interface{}{"b": true, "a": false, "c": 42.0, "d": 4.2, "e": "text", "f": []interface{}{34}, "g": map[string]interface{}{"A": 45, "B": 1.2}},
+
+		"obj2": map[string]interface{}{"a": false, "b": true, "c": 42, "d": 4.2, "e": "text"},
+		"obj3": map[string]interface{}{"a": false, "b": true, "c": 42, "d": 4.2, "e": ""},
+	}
+
+	assertEquality(t, vars, true, "emptyObj", "emptyObj")
+	assertEquality(t, vars, true, "obj1a", "obj1a")
+	assertEquality(t, vars, true, "obj1b", "obj1b")
+	assertEquality(t, vars, true, "obj2", "obj2")
+	assertEquality(t, vars, true, "obj3", "obj3")
+
+	assertEquality(t, vars, true, "obj1a", "obj1b")
+	assertEquality(t, vars, true, "obj1b", "obj1b")
+
+	assertEquality(t, vars, false, "obj1a", "obj2")
+	assertEquality(t, vars, false, "obj1a", "obj3")
+	assertEquality(t, vars, false, "obj2", "obj3")
+
+	assertEquality(t, vars, false, "emptyObj", "null")
+	assertEquality(t, vars, false, "emptyObj", "0")
+	assertEquality(t, vars, false, "emptyObj", "obj1a")
+	assertEquality(t, vars, false, `emptyObj`, `""`)
+}
+
 func Test_VariableAccess_Simple(t *testing.T) {
 	vars := getTestVars()
 	for key, val := range vars {
 		assertEvaluation(t, vars, val, key)
-		assertEvaluation(t, vars, val, "(" + key + ")")
+		assertEvaluation(t, vars, val, "("+key+")")
 	}
 }
 

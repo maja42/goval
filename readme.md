@@ -29,7 +29,7 @@ That's how this library was born. The main differences are:
 
 # Types
 
-This library fully supports the following types: `int`, `float64`, `bool`, `string`, `[]interface{}` (=arrays) and `map[string]interface{}` (=objects). 
+This library fully supports the following types: `bool`, `int`, `float64`, `string`, `[]interface{}` (=arrays) and `map[string]interface{}` (=objects). 
 
 If necessary, numerical values will be automatically converted between `int` and `float64`, as long as no precision is lost.
 
@@ -75,6 +75,19 @@ false
 ```
 
 It will also be possible to add array- and object literals (not implemented yet).
+
+# Precedence
+
+Operator precedence strictly follows [C/C++ rules](http://en.cppreference.com/w/cpp/language/operator_precedence).
+
+Parenthesis `()` is used to control precedence.
+
+Examples:
+
+```
+1 + 2 * 3    // 7
+(1 + 2) * 3  // 9
+```
 
 # Operators
 
@@ -129,6 +142,19 @@ Examples:
 ```
 
 ## Logic
+
+
+### And `&&`, Or `||`
+
+Examples:
+
+```
+true && true             // true
+false || false           // false
+true || false && false   // true
+false && false || true   // true
+```
+
 
 ### Not `!`
 

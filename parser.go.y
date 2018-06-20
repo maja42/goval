@@ -24,11 +24,19 @@ package main
 %token<token> IDENT
 %token<token> AND            // &&
 %token<token> OR             // ||
+%token<token> EQL            // ==
+%token<token> NEQ            // !=
+%token<token> LSS            // <
+%token<token> GTR            // >
+%token<token> LEQ            // <=
+%token<token> GEQ            // >=
 
 /* Operator precedence is taken from c: http://en.cppreference.com/w/c/language/operator_precedence */
 
 %left  OR
 %left  AND
+%left  EQL NEQ
+%left  LSS LEQ GTR GEQ
 %left  '+' '-'
 %left  '*' '/'
 %right '!'
@@ -68,8 +76,10 @@ math
 
 logic
   : '!' expr              { $$ = !asBool($2) }
-  | expr AND expr         { $$ = asBool($1) && asBool($3) }
-  | expr OR expr          { $$ = asBool($1) || asBool($3) }
+  | expr EQL expr         { $$ = deepEqual($1, $3) }
+  | expr NEQ expr         { $$ = !deepEqual($1, $3) }
+  | expr AND expr         { left := asBool($1); right := asBool($3); $$ = left && right }
+  | expr OR expr          { left := asBool($1); right := asBool($3); $$ = left || right }
 
 varAccess
   : IDENT                   { $$ = accessVar(yylex.(*Lexer).variables, $1.literal) }

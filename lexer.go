@@ -100,9 +100,22 @@ func (l *Lexer) Lex(lval *yySymType) int {
 
 	case token.LAND:
 		tokenType = AND
-
 	case token.LOR:
 		tokenType = OR
+
+	case token.EQL:
+		tokenType = EQL
+	case token.NEQ:
+		tokenType = NEQ
+
+	case token.LSS:
+		tokenType = LSS
+	case token.GTR:
+		tokenType = GTR
+	case token.LEQ:
+		tokenType = LEQ
+	case token.GEQ:
+		tokenType = GEQ
 
 		// Variables
 
