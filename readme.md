@@ -54,8 +54,16 @@ var["fie" + "ld"].field[42 - var2][0]
 
 # Functions
 
-It will be possible to call custom-defined functions (not implemented yet).
+It is possible to call custom-defined functions from within expressions.
 
+Examples:
+
+```
+rand()
+floor(42)
+min(4, 3, 12, max(1, 3, 3))
+len("te" + "xt")
+```
 
 # Literals
 
@@ -108,7 +116,7 @@ Examples:
 
 "text" + 42     // "text42"
 42 + "text"     // "42text"
-"text" + true   // "textrue"
+"text" + true   // "texttrue"
 ```
 
 ### Arithmetic `-` `*` `/`
@@ -143,6 +151,11 @@ Examples:
 
 ## Logic
 
+### Equals `==`, NotEquals `!=`
+
+Performs a deep-compare between the two operands.
+When comparing `int` and `float64`, 
+the integer will be casted to a floating point number.
 
 ### And `&&`, Or `||`
 

@@ -18,7 +18,7 @@ func main() {
 	// yyDebug = 5
 	yyErrorVerbose = true
 
-	lexer := NewLexer(src, nil)
+	lexer := NewLexer(src, nil, nil)
 	yyParse(lexer)
 	fmt.Printf("%#v\n", lexer.result)
 }

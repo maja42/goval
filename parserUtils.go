@@ -273,3 +273,17 @@ func accessField(s interface{}, field interface{}) interface{} {
 
 	return nil
 }
+
+func callFunction(functions map[string]ExpressionFunction, name string, args []interface{}) interface{} {
+	f, ok := functions[name]
+	if !ok {
+		panic(fmt.Errorf("syntax error: no such function %q", name))
+	}
+
+	res, err := f(args...)
+	if err != nil {
+		panic(fmt.Errorf("function error: %q - %s", name, err))
+	}
+
+	return res
+}

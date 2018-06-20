@@ -11,7 +11,7 @@ func init() {
 }
 
 type Evaluator interface {
-	Evaluate(str string, variables map[string]interface{}) (interface{}, error)
+	Evaluate(str string, variables map[string]interface{}, functions map[string]ExpressionFunction) (interface{}, error)
 }
 
 func NewEvaluator() Evaluator {
@@ -24,7 +24,9 @@ type evaluator struct {
 	parser yyParser
 }
 
-func (e *evaluator) Evaluate(str string, variables map[string]interface{}) (result interface{}, err error) {
+type ExpressionFunction func(args ...interface{}) (interface{}, error)
+
+func (e *evaluator) Evaluate(str string, variables map[string]interface{}, functions map[string]ExpressionFunction) (result interface{}, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			if _, ok := r.(runtime.Error); ok {
@@ -34,7 +36,7 @@ func (e *evaluator) Evaluate(str string, variables map[string]interface{}) (resu
 		}
 	}()
 
-	lexer := NewLexer(str, variables)
+	lexer := NewLexer(str, variables, functions)
 
 	e.parser.Parse(lexer)
 

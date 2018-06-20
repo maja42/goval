@@ -6,6 +6,7 @@ package main
 %union {
   token     Token
   expr      interface{}
+  exprList  []interface{}
 }
 
 
@@ -17,6 +18,7 @@ package main
 %type<expr> math
 %type<expr> logic
 %type<expr> varAccess
+%type<exprList> exprList
 
 %token<token> LITERAL_BOOL   // true false
 %token<token> LITERAL_NUMBER // 42 4.2 4e2 4.2e2
@@ -57,7 +59,8 @@ expr
   | math
   | logic
   | varAccess
-  | '(' expr ')'          { $$ = $2 }
+  | '(' expr ')'           { $$ = $2 }
+  | IDENT '(' exprList ')' { $$ = callFunction(yylex.(*Lexer).functions, $1.literal, $3) }
   ;
 
 literal
@@ -87,6 +90,11 @@ varAccess
   | varAccess '[' expr ']'  { $$ = accessField($1, $3) }
   ;
 
+exprList
+  :                       { $$ = []interface{}{} }
+  | expr                  { $$ = []interface{}{$1} }
+  | exprList ',' expr     { $$ = append($1, $3) }
+  ;
 
 %%
 

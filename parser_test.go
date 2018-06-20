@@ -5,6 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"strconv"
 	"fmt"
+	"github.com/pkg/errors"
 )
 
 //go:generate goyacc.exe -o parser.go parser.go.y
@@ -54,7 +55,7 @@ func Test_InvalidLiterals(t *testing.T) {
 	assertEvalError(t, nil, "unknown token \"CHAR\" (\"'text'\") at position 1", `'text'`)
 	assertEvalError(t, nil, "parse error: cannot unquote string literal at position 1", `"`)
 	assertEvalError(t, nil, "parse error: cannot unquote string literal at position 1", `"text`)
-	assertEvalError(t, nil, "var error: variable \"text\" does not exist", `text"`)
+	assertEvalError(t, nil, "parse error: cannot unquote string literal at position 5", `text"`)
 }
 
 func Test_Bool_Not(t *testing.T) {
@@ -344,7 +345,7 @@ func Test_AndOr_InvalidTypes(t *testing.T) {
 			expectedErr = fmt.Sprintf("type error: required bool, but was %s", nonBoolType)
 			assertEvalError(t, vars, expectedErr, t1+"||"+t2)
 
-			result, err := evaluate(t1+"||"+t2, vars)
+			result, err := evaluate(t1+"||"+t2, vars, nil)
 			assert.Errorf(t, err, "%v || %v\n", t1, t2)
 			assert.Nil(t, result)
 		}
@@ -641,6 +642,86 @@ func Test_VariableAccess_DynamicAccess(t *testing.T) {
 	assertEvaluation(t, vars, 43, `obj[ arr[obj["a"] + 3] ]`)
 }
 
+func Test_FunctionCall_Simple(t *testing.T) {
+	vars := getTestVars()
+
+	functions := map[string]ExpressionFunction{
+		"func": func(args ...interface{}) (interface{}, error) {
+			assert.Len(t, args, 2)
+			varName := args[0].(string)
+			varValue := args[1]
+			assert.Equal(t, vars[varName], varValue)
+			return varValue, nil
+		},
+	}
+	for name, val := range vars {
+		assertEvaluationFuncs(t, vars, functions, val, `func("`+name+`", `+name+` )`)
+	}
+
+	// function with same name as variable:
+	vars["func"] = "foo"
+	assertEvaluationFuncs(t, vars, functions, "foo", `func("func", func)`)
+}
+
+func Test_FunctionCall_Nested(t *testing.T) {
+	functions := map[string]ExpressionFunction{
+		"func": func(args ...interface{}) (interface{}, error) {
+			var allArgs = make([]interface{}, 0)
+
+			for _, arg := range args {
+				multi, ok := arg.([]interface{})
+				if ok {
+					allArgs = append(allArgs, multi...)
+				} else {
+					allArgs = append(allArgs, arg)
+				}
+			}
+			return allArgs, nil
+		},
+	}
+
+	assertEvaluationFuncs(t, nil, functions, []interface{}{1, 2, 3, 4}, `func(1, 2, 3, 4)`)
+	assertEvaluationFuncs(t, nil, functions, []interface{}{1, 2, 3, 4}, `func(func(1, 2, 3, 4))`)
+	assertEvaluationFuncs(t, nil, functions, []interface{}{1, 2, 3, 4}, `func(func(1, 2), func(3, 4))`)
+	assertEvaluationFuncs(t, nil, functions, []interface{}{1, 2, 3, 4}, `func(func(1, func(2), func()), func(), func(3, 4))`)
+}
+
+
+func Test_FunctionCall_Variables(t *testing.T) {
+	var shouldReturn interface{}
+	var expectedArg interface{}
+
+	functions := map[string]ExpressionFunction{
+		"func1": func(args ...interface{}) (interface{}, error) {
+			return shouldReturn, nil
+		},
+		"func2": func(args ...interface{}) (interface{}, error) {
+			assert.Equal(t, expectedArg, args[0])
+			return args[0], nil
+		},
+		"func3": func(args ...interface{}) (interface{}, error) {
+			return []interface{}{len(args), args}, nil
+		},
+		"func4": func(args ...interface{}) (interface{}, error) {
+			return nil, errors.New("simulated error")
+		},
+	}
+
+	tests := map[string]interface{}{`true`: true, `false`: false, `42`: 42, `4.2`: 4.2, `"text"`: "text", `"0"`: "0"}
+
+	for expr, expected := range tests {
+		shouldReturn = expected
+		assertEvaluationFuncs(t, nil, functions, expected, `func1()`)
+		expectedArg = expected
+		assertEvaluationFuncs(t, nil, functions, expected, `func2(`+expr+`)`)
+	}
+
+	expectedReturn := []interface{}{6, []interface{}{true, false, 42, 4.2, "text", "0"}}
+	assertEvaluationFuncs(t, nil, functions, expectedReturn, `func3(true, false, 42, 4.2, "text", "0")`)
+
+	assertEvalErrorFuncs(t , nil, functions, "function error: \"func4\" - simulated error", "func4()")
+}
+
 // func tokenize(src string) {
 // 	var scanner scanner.Scanner
 // 	fset := token.NewFileSet()
@@ -656,20 +737,31 @@ func Test_VariableAccess_DynamicAccess(t *testing.T) {
 // 	}
 // }
 
-func evaluate(str string, variables map[string]interface{}) (result interface{}, err error) {
+func evaluate(str string, variables map[string]interface{}, functions map[string]ExpressionFunction) (result interface{}, err error) {
 	evaluator := NewEvaluator()
-	return evaluator.Evaluate(str, variables)
+	return evaluator.Evaluate(str, variables, functions)
 }
 
 func assertEvaluation(t *testing.T, variables map[string]interface{}, expected interface{}, str string) {
-	result, err := evaluate(str, variables)
+	result, err := evaluate(str, variables, nil)
+	if assert.NoError(t, err) {
+		assert.Equal(t, expected, result)
+	}
+}
+
+func assertEvaluationFuncs(t *testing.T, variables map[string]interface{}, functions map[string]ExpressionFunction, expected interface{}, str string) {
+	result, err := evaluate(str, variables, functions)
 	if assert.NoError(t, err) {
 		assert.Equal(t, expected, result)
 	}
 }
 
 func assertEvalError(t *testing.T, variables map[string]interface{}, expectedErr string, str string) {
-	result, err := evaluate(str, variables)
+	assertEvalErrorFuncs(t, variables, nil, expectedErr, str)
+}
+
+func assertEvalErrorFuncs(t *testing.T, variables map[string]interface{}, functions map[string]ExpressionFunction, expectedErr string, str string) {
+	result, err := evaluate(str, variables, functions)
 	if assert.Error(t, err) {
 		assert.Equal(t, expectedErr, err.Error())
 	}

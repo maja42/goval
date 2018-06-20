@@ -20,15 +20,20 @@ type Lexer struct {
 	result  interface{}
 
 	variables map[string]interface{}
+	functions map[string]ExpressionFunction
 }
 
-func NewLexer(src string, variables map[string]interface{}) *Lexer {
+func NewLexer(src string, variables map[string]interface{}, functions map[string]ExpressionFunction) *Lexer {
 	if variables == nil {
 		variables = map[string]interface{}{}
+	}
+	if functions == nil {
+		functions = map[string]ExpressionFunction{}
 	}
 
 	lexer := &Lexer{
 		variables: variables,
+		functions: functions,
 	}
 
 	fset := token.NewFileSet()
@@ -132,6 +137,9 @@ func (l *Lexer) Lex(lval *yySymType) int {
 
 	case token.PERIOD:
 		tokenType = int('.')
+
+	case token.COMMA:
+		tokenType = int(',')
 
 	case token.LBRACK, token.RBRACK,
 		token.LPAREN, token.RPAREN:
