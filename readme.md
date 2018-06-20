@@ -79,9 +79,11 @@ false
 [0, 1, 2]
 []
 [0, ["text", false], 4.2]
+{}
+{"a": 1, "b": {c: 3}}
+{"key" + 42: "value"}
+{"k" + "e" + "y": "value"}
 ```
-
-It will also be possible to add array- and object literals (not implemented yet).
 
 # Precedence
 
@@ -100,7 +102,7 @@ Examples:
 
 ## Arithmetic
 
-### Addition, string and array concatenation `+`
+### Addition, string, array and object concatenation `+`
 
 If either the left or right side is a `string`, a string concatenation is performed.
 Otherwise, both sides need to be numbers and will be added. If both sides are integers, the resulting value is
@@ -117,7 +119,9 @@ Examples:
 42 + "text"     // "42text"
 "text" + true   // "texttrue"
 
-[0, 1] + [2, 3] // [0, 1, 2, 3]
+[0, 1] + [2, 3]                        // [0, 1, 2, 3]
+{"a": 1, "b": 2} + {"b": 3, "c": 4}    // {"a": 1, "b": 3, "c": 4}
+{"b": 3, "c": 4} + {"a": 1, "b": 2}    // {"a": 1, "b": 2, "c": 4}
 ```
 
 ### Arithmetic `-` `*` `/`

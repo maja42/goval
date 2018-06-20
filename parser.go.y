@@ -7,6 +7,7 @@ package main
   token     Token
   expr      interface{}
   exprList  []interface{}
+  exprMap   map[string]interface{}
 }
 
 
@@ -19,6 +20,7 @@ package main
 %type<expr> logic
 %type<expr> varAccess
 %type<exprList> exprList
+%type<exprMap> exprMap
 
 %token<token> LITERAL_BOOL   // true false
 %token<token> LITERAL_NUMBER // 42 4.2 4e2 4.2e2
@@ -70,6 +72,8 @@ literal
   | LITERAL_STRING        { $$ = $1.value }
   | '[' ']'               { $$ = []interface{}{} }
   | '[' exprList ']'      { $$ = $2 }
+  | '{' '}'               { $$ = map[string]interface{}{} }
+  | '{' exprMap '}'       { $$ = $2 }
   ;
 
 math
@@ -97,6 +101,10 @@ exprList
   : expr                  { $$ = []interface{}{$1} }
   | exprList ',' expr     { $$ = append($1, $3) }
   ;
+
+exprMap
+  : expr ':' expr               { $$ = make(map[string]interface{}); $$[asObjectKey($1)] = $3 }
+  | exprMap ',' expr ':' expr   { $$ = addObjectMember($1, $3, $5) }
 
 %%
 

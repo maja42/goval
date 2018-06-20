@@ -141,7 +141,11 @@ func (l *Lexer) Lex(lval *yySymType) int {
 	case token.COMMA:
 		tokenType = int(',')
 
+	case token.COLON:
+		tokenType = int(':')
+
 	case token.LBRACK, token.RBRACK,
+		token.LBRACE, token.RBRACE,
 		token.LPAREN, token.RPAREN:
 		tokenType = int(tok.String()[0])
 

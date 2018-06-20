@@ -91,6 +91,20 @@ func add(val1 interface{}, val2 interface{}) interface{} {
 		return append(arr1, arr2...)
 	}
 
+	obj1, obj1OK := val1.(map[string]interface{})
+	obj2, obj2OK := val2.(map[string]interface{})
+
+	if obj1OK && obj2OK {
+		sum := make(map[string]interface{})
+		for k, v := range obj1 {
+			sum[k] = v
+		}
+		for k, v := range obj2 {
+			sum[k] = v
+		}
+		return sum
+	}
+
 	panic(fmt.Errorf("type error: cannot add or concatenate type %s and %s", typeOf(val1), typeOf(val2)))
 }
 
@@ -234,6 +248,24 @@ func deepEqual(val1 interface{}, val2 interface{}) bool {
 		return false
 	}
 	return val1 == val2
+}
+
+func asObjectKey(key interface{}) string {
+	s, ok := key.(string)
+	if !ok {
+		panic(fmt.Errorf("type error: object key must be string, but was %s", typeOf(key)))
+	}
+	return s
+}
+
+func addObjectMember(obj map[string]interface{}, key, val interface{}) map[string]interface{} {
+	s := asObjectKey(key)
+	_, ok := obj[s]
+	if ok {
+		panic(fmt.Errorf("syntax error: duplicate object key %q", s))
+	}
+	obj[s] = val
+	return obj
 }
 
 func accessVar(variables map[string]interface{}, varName string) interface{} {
