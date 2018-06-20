@@ -60,6 +60,7 @@ expr
   | logic
   | varAccess
   | '(' expr ')'           { $$ = $2 }
+  | IDENT '(' ')'          { $$ = callFunction(yylex.(*Lexer).functions, $1.literal, []interface{}{}) }
   | IDENT '(' exprList ')' { $$ = callFunction(yylex.(*Lexer).functions, $1.literal, $3) }
   ;
 
@@ -67,6 +68,8 @@ literal
   : LITERAL_BOOL          { $$ = $1.value }
   | LITERAL_NUMBER        { $$ = $1.value }
   | LITERAL_STRING        { $$ = $1.value }
+  | '[' ']'               { $$ = []interface{}{} }
+  | '[' exprList ']'      { $$ = $2 }
   ;
 
 math
@@ -85,14 +88,13 @@ logic
   | expr OR expr          { left := asBool($1); right := asBool($3); $$ = left || right }
 
 varAccess
-  : IDENT                   { $$ = accessVar(yylex.(*Lexer).variables, $1.literal) }
-  | varAccess '.' IDENT     { $$ = accessField($1, $3.literal) }
-  | varAccess '[' expr ']'  { $$ = accessField($1, $3) }
+  : IDENT                 { $$ = accessVar(yylex.(*Lexer).variables, $1.literal) }
+  | expr '.' IDENT        { $$ = accessField($1, $3.literal) }
+  | expr '[' expr ']'     { $$ = accessField($1, $3) }
   ;
 
 exprList
-  :                       { $$ = []interface{}{} }
-  | expr                  { $$ = []interface{}{$1} }
+  : expr                  { $$ = []interface{}{$1} }
   | exprList ',' expr     { $$ = append($1, $3) }
   ;
 

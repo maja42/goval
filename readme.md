@@ -23,10 +23,6 @@ That's how this library was born. The main differences are:
 - High performance and highly extensible due to the use of yacc
 
 
-  
- 
-
-
 # Types
 
 This library fully supports the following types: `bool`, `int`, `float64`, `string`, `[]interface{}` (=arrays) and `map[string]interface{}` (=objects). 
@@ -80,6 +76,9 @@ false
 "Hello, 世界!\n"
 "te\"xt"
 `te"xt`
+[0, 1, 2]
+[]
+[0, ["text", false], 4.2]
 ```
 
 It will also be possible to add array- and object literals (not implemented yet).
@@ -101,7 +100,7 @@ Examples:
 
 ## Arithmetic
 
-### Addition, concatenation `+`
+### Addition, string and array concatenation `+`
 
 If either the left or right side is a `string`, a string concatenation is performed.
 Otherwise, both sides need to be numbers and will be added. If both sides are integers, the resulting value is
@@ -117,6 +116,8 @@ Examples:
 "text" + 42     // "text42"
 42 + "text"     // "42text"
 "text" + true   // "texttrue"
+
+[0, 1] + [2, 3] // [0, 1, 2, 3]
 ```
 
 ### Arithmetic `-` `*` `/`

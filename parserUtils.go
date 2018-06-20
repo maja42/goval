@@ -84,6 +84,13 @@ func add(val1 interface{}, val2 interface{}) interface{} {
 		return strconv.FormatBool(bool1) + str2
 	}
 
+	arr1, arr1OK := val1.([]interface{})
+	arr2, arr2OK := val2.([]interface{})
+
+	if arr1OK && arr2OK {
+		return append(arr1, arr2...)
+	}
+
 	panic(fmt.Errorf("type error: cannot add or concatenate type %s and %s", typeOf(val1), typeOf(val2)))
 }
 

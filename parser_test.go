@@ -5,7 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"strconv"
 	"fmt"
-	"github.com/pkg/errors"
+	"errors"
 )
 
 //go:generate goyacc.exe -o parser.go parser.go.y
@@ -32,6 +32,12 @@ func Test_Literals(t *testing.T) {
 
 	assertEvaluation(t, nil, "Hello, 世界", `"Hello, 世界"`)
 	assertEvaluation(t, nil, "\t\t\n\xFF\u0100.+=!", `"\t	\n\xFF\u0100.+=!"`)
+
+	assertEvaluation(t, nil, []interface{}{}, `[]`)
+	assertEvaluation(t, nil, []interface{}{1, 2, 3}, `[1, 2, 3]`)
+	assertEvaluation(t, nil, []interface{}{true, false, 42, 4.2, "text"}, `[true, false, 42, 4.2, "text"]`)
+	assertEvaluation(t, nil, []interface{}{[]interface{}{1, 2}, []interface{}{3}, []interface{}{}}, `[ [1,2], [3], [] ]`)
+
 }
 
 func Test_LiteralsOutOfRange(t *testing.T) {
@@ -51,11 +57,17 @@ func Test_MissingOperator(t *testing.T) {
 func Test_InvalidLiterals(t *testing.T) {
 	assertEvalError(t, nil, "var error: variable \"bool\" does not exist", "bool")
 	assertEvalError(t, nil, "syntax error: unexpected LITERAL_NUMBER", `4.2.0`)
+
 	assertEvalError(t, nil, "unknown token \"CHAR\" (\"'t'\") at position 1", `'t'`)
 	assertEvalError(t, nil, "unknown token \"CHAR\" (\"'text'\") at position 1", `'text'`)
 	assertEvalError(t, nil, "parse error: cannot unquote string literal at position 1", `"`)
 	assertEvalError(t, nil, "parse error: cannot unquote string literal at position 1", `"text`)
 	assertEvalError(t, nil, "parse error: cannot unquote string literal at position 5", `text"`)
+
+	assertEvalError(t, nil, "syntax error: unexpected $end", `[`)
+	assertEvalError(t, nil, "syntax error: unexpected ']'", `]`)
+	assertEvalError(t, nil, "syntax error: unexpected ']'", `[1, ]`)
+	assertEvalError(t, nil, "syntax error: unexpected ','", `[, 1]`)
 }
 
 func Test_Bool_Not(t *testing.T) {
@@ -80,6 +92,8 @@ func Test_Bool_Not_NotApplicable(t *testing.T) {
 
 	assertEvalError(t, nil, "type error: required bool, but was string", `!"text"`)
 	assertEvalError(t, nil, "type error: required bool, but was number", "!1.0")
+	assertEvalError(t, nil, "type error: required bool, but was array", "![]")
+	assertEvalError(t, nil, "type error: required bool, but was array", "![false]")
 }
 
 func Test_String_Concat(t *testing.T) {
@@ -126,6 +140,20 @@ func Test_Add_WithUnaryMinus(t *testing.T) {
 	assertEvaluation(t, nil, -7, "-(4+3)")
 }
 
+func Test_Array_Concat(t *testing.T) {
+	vars := map[string]interface{}{
+		"arr": []interface{}{true, 42},
+	}
+	assertEvaluation(t, vars, []interface{}{}, `[] + []`)
+	assertEvaluation(t, vars, []interface{}{0, 1, 2, 3}, `[0, 1] + [2, 3]`)
+
+	assertEvaluation(t, vars, []interface{}{true, 42, true, 42, true, 42}, `[] + arr + [] + arr + arr`)
+	assert.Len(t, vars["arr"], 2)
+
+	assertEvaluation(t, vars, []interface{}{true, 42, 0, 1, true, 42}, `arr + [0, 1] + arr`)
+	assert.Len(t, vars["arr"], 2)
+}
+
 func Test_Add_IncompatibleTypes(t *testing.T) {
 	vars := getTestVars()
 	assertEvalError(t, vars, "type error: cannot add or concatenate type bool and bool", `false + false`)
@@ -140,7 +168,6 @@ func Test_Add_IncompatibleTypes(t *testing.T) {
 	assertEvalError(t, vars, "type error: cannot add or concatenate type array and bool", `arr + false`)
 	assertEvalError(t, vars, "type error: cannot add or concatenate type object and bool", `obj + false`)
 
-	assertEvalError(t, vars, "type error: cannot add or concatenate type array and array", `arr + arr`)
 	assertEvalError(t, vars, "type error: cannot add or concatenate type array and object", `arr + obj`)
 	assertEvalError(t, vars, "type error: cannot add or concatenate type object and object", `obj + obj`)
 	assertEvalError(t, vars, "type error: cannot add or concatenate type object and array", `obj + arr`)
@@ -238,8 +265,8 @@ func Test_Arithmetic_Divide(t *testing.T) {
 
 func Test_Arithmetic_InvalidTypes(t *testing.T) {
 	vars := getTestVars()
-	allTypes := []string{"true", "false", "42", "4.2", `"text"`, `"0"`, "arr", "obj"}
-	typeOfAllTypes := []string{"bool", "bool", "number", "number", "string", "string", "array", "object"}
+	allTypes := []string{"true", "false", "42", "4.2", `"text"`, `"0"`, "[0]", "[]", "arr", "obj"}
+	typeOfAllTypes := []string{"bool", "bool", "number", "number", "string", "string", "array", "array", "array", "object"}
 
 	for idx1, t1 := range allTypes {
 		for idx2, t2 := range allTypes {
@@ -321,8 +348,8 @@ func Test_AndOr_Order(t *testing.T) {
 
 func Test_AndOr_InvalidTypes(t *testing.T) {
 	vars := getTestVars()
-	allTypes := []string{"true", "false", "42", "4.2", `"text"`, `"0"`, "arr", "obj"}
-	typeOfAllTypes := []string{"bool", "bool", "number", "number", "string", "string", "array", "object"}
+	allTypes := []string{"true", "false", "42", "4.2", `"text"`, `"0"`, "[0]", "[]", "arr", "obj"}
+	typeOfAllTypes := []string{"bool", "bool", "number", "number", "string", "string", "array", "array", "array", "object"}
 
 	for idx1, t1 := range allTypes {
 		for idx2, t2 := range allTypes {
@@ -399,11 +426,15 @@ func Test_Equality_Arrays(t *testing.T) {
 	}
 
 	assertEquality(t, vars, true, `emptyArr`, `emptyArr`)
+	assertEquality(t, vars, true, `[]`, `emptyArr`)
+	assertEquality(t, vars, true, `emptyArr`, `[]`)
 	assertEquality(t, vars, true, `arr1a`, `arr1a`)
 	assertEquality(t, vars, true, `arr1b`, `arr1b`)
 	assertEquality(t, vars, true, `arr2`, `arr2`)
 	assertEquality(t, vars, true, `arr3`, `arr3`)
+	assertEquality(t, vars, true, `arr3`, `[false, true, 42, 4.2, "text"]`)
 	assertEquality(t, vars, true, `arr4`, `arr4`)
+	assertEquality(t, vars, true, `arr4`, `[false, true, 42, 4.2, ""]`)
 
 	assertEquality(t, vars, true, `arr1a`, `arr1b`)
 	assertEquality(t, vars, true, `arr1b`, `arr1b`)
@@ -520,6 +551,12 @@ func Test_VariableAccess_ArraySyntax(t *testing.T) {
 		assertEvaluation(t, vars, val, `arr[`+strIdx+`.0]`)
 		assertEvaluation(t, vars, val, `arr[(`+strIdx+`.0)]`)
 	}
+
+	// access array literals
+	assertEvaluation(t, vars, false, `[false, 42,  "text"][0]`)
+	assertEvaluation(t, vars, 42, `[false, 42,  "text"][1]`)
+	assertEvaluation(t, vars, "text", `[false, 42, "text"][2]`)
+	assertEvaluation(t, vars, 0.0, `([0.0])[0]`)
 }
 
 func Test_VariableAccess_ArraySyntax_DoesNotExist(t *testing.T) {
@@ -531,6 +568,8 @@ func Test_VariableAccess_ArraySyntax_DoesNotExist(t *testing.T) {
 
 	assertEvalError(t, vars, "var error: array index 5 is out of range [0, 4]", `arr[5]`)
 	assertEvalError(t, vars, "var error: array index 6 is out of range [0, 4]", `arr[6]`)
+	assertEvalError(t, vars, "var error: array index 0 is out of range [0, 0]", `[][0]`)
+	assertEvalError(t, vars, "var error: array index 41 is out of range [0, 1]", `[1][41]`)
 }
 
 func Test_VariableAccess_ArraySyntax_InvalidType(t *testing.T) {
@@ -542,6 +581,7 @@ func Test_VariableAccess_ArraySyntax_InvalidType(t *testing.T) {
 
 	assertEvalError(t, vars, "syntax error: array index must be number, but was bool", `arr[true]`)
 	assertEvalError(t, vars, "syntax error: array index must be number, but was string", `arr["0"]`)
+	assertEvalError(t, vars, "syntax error: array index must be number, but was string", `["0"]["0"]`)
 	assertEvalError(t, vars, "syntax error: array index must be number, but was array", `arr[arr]`)
 	assertEvalError(t, vars, "syntax error: array index must be number, but was object", `arr[obj]`)
 }
@@ -643,51 +683,6 @@ func Test_VariableAccess_DynamicAccess(t *testing.T) {
 }
 
 func Test_FunctionCall_Simple(t *testing.T) {
-	vars := getTestVars()
-
-	functions := map[string]ExpressionFunction{
-		"func": func(args ...interface{}) (interface{}, error) {
-			assert.Len(t, args, 2)
-			varName := args[0].(string)
-			varValue := args[1]
-			assert.Equal(t, vars[varName], varValue)
-			return varValue, nil
-		},
-	}
-	for name, val := range vars {
-		assertEvaluationFuncs(t, vars, functions, val, `func("`+name+`", `+name+` )`)
-	}
-
-	// function with same name as variable:
-	vars["func"] = "foo"
-	assertEvaluationFuncs(t, vars, functions, "foo", `func("func", func)`)
-}
-
-func Test_FunctionCall_Nested(t *testing.T) {
-	functions := map[string]ExpressionFunction{
-		"func": func(args ...interface{}) (interface{}, error) {
-			var allArgs = make([]interface{}, 0)
-
-			for _, arg := range args {
-				multi, ok := arg.([]interface{})
-				if ok {
-					allArgs = append(allArgs, multi...)
-				} else {
-					allArgs = append(allArgs, arg)
-				}
-			}
-			return allArgs, nil
-		},
-	}
-
-	assertEvaluationFuncs(t, nil, functions, []interface{}{1, 2, 3, 4}, `func(1, 2, 3, 4)`)
-	assertEvaluationFuncs(t, nil, functions, []interface{}{1, 2, 3, 4}, `func(func(1, 2, 3, 4))`)
-	assertEvaluationFuncs(t, nil, functions, []interface{}{1, 2, 3, 4}, `func(func(1, 2), func(3, 4))`)
-	assertEvaluationFuncs(t, nil, functions, []interface{}{1, 2, 3, 4}, `func(func(1, func(2), func()), func(), func(3, 4))`)
-}
-
-
-func Test_FunctionCall_Variables(t *testing.T) {
 	var shouldReturn interface{}
 	var expectedArg interface{}
 
@@ -719,7 +714,65 @@ func Test_FunctionCall_Variables(t *testing.T) {
 	expectedReturn := []interface{}{6, []interface{}{true, false, 42, 4.2, "text", "0"}}
 	assertEvaluationFuncs(t, nil, functions, expectedReturn, `func3(true, false, 42, 4.2, "text", "0")`)
 
-	assertEvalErrorFuncs(t , nil, functions, "function error: \"func4\" - simulated error", "func4()")
+	assertEvalErrorFuncs(t, nil, functions, "function error: \"func4\" - simulated error", "func4()")
+}
+
+func Test_FunctionCall_Nested(t *testing.T) {
+	functions := map[string]ExpressionFunction{
+		"func": func(args ...interface{}) (interface{}, error) {
+			var allArgs = make([]interface{}, 0)
+
+			for _, arg := range args {
+				multi, ok := arg.([]interface{})
+				if ok {
+					allArgs = append(allArgs, multi...)
+				} else {
+					allArgs = append(allArgs, arg)
+				}
+			}
+			return allArgs, nil
+		},
+	}
+
+	assertEvaluationFuncs(t, nil, functions, []interface{}{1, 2, 3, 4}, `func(1, 2, 3, 4)`)
+	assertEvaluationFuncs(t, nil, functions, []interface{}{1, 2, 3, 4}, `func([1, 2], [3], 4)`)
+	assertEvaluationFuncs(t, nil, functions, []interface{}{1, 2, 3, 4}, `func(func(1, 2, 3, 4))`)
+	assertEvaluationFuncs(t, nil, functions, []interface{}{1, 2, 3, 4}, `func(func(1, 2), func(3, 4))`)
+	assertEvaluationFuncs(t, nil, functions, []interface{}{1, 2, 3, 4}, `func(func(1, func(2), func()), func(), func(3, 4))`)
+}
+
+func Test_FunctionCall_Variables(t *testing.T) {
+	vars := getTestVars()
+
+	functions := map[string]ExpressionFunction{
+		"func": func(args ...interface{}) (interface{}, error) {
+			assert.Len(t, args, 2)
+			varName := args[0].(string)
+			varValue := args[1]
+			assert.Equal(t, vars[varName], varValue)
+			return varValue, nil
+		},
+	}
+	for name, val := range vars {
+		assertEvaluationFuncs(t, vars, functions, val, `func("`+name+`", `+name+` )`)
+	}
+
+	// function with same name as variable:
+	vars["func"] = "foo"
+	assertEvaluationFuncs(t, vars, functions, "foo", `func("func", func)`)
+}
+
+func Test_InvalidFunctionCalls(t *testing.T) {
+	vars := map[string]interface{}{"func": nil}
+	functions := map[string]ExpressionFunction{
+		"func": func(args ...interface{}) (interface{}, error) {
+			return nil, nil
+		},
+	}
+
+	assertEvalErrorFuncs(t, vars, functions, "syntax error: unexpected $end", `func(`)
+	assertEvalErrorFuncs(t, vars, functions, "syntax error: unexpected ')'", `func)`)
+	assertEvalErrorFuncs(t, vars, functions, "syntax error: unexpected ','", `func((1, 2))`)
 }
 
 // func tokenize(src string) {
