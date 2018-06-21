@@ -18,6 +18,7 @@ package main
 %type<expr> literal
 %type<expr> math
 %type<expr> logic
+%type<expr> bitManipulation
 %type<expr> varAccess
 %type<exprList> exprList
 %type<exprMap> exprMap
@@ -35,10 +36,13 @@ package main
 %token<token> LEQ            // <=
 %token<token> GEQ            // >=
 
-/* Operator precedence is taken from c: http://en.cppreference.com/w/c/language/operator_precedence */
+/* Operator precedence is taken from C/C++: http://en.cppreference.com/w/c/language/operator_precedence */
 
 %left  OR
 %left  AND
+%left  '|'
+%left  '^'
+%left  '&'
 %left  EQL NEQ
 %left  LSS LEQ GTR GEQ
 %left  '+' '-'
@@ -60,6 +64,7 @@ expr
   : literal
   | math
   | logic
+  | bitManipulation
   | varAccess
   | '(' expr ')'           { $$ = $2 }
   | IDENT '(' ')'          { $$ = callFunction(yylex.(*Lexer).functions, $1.literal, []interface{}{}) }
@@ -95,6 +100,13 @@ logic
   | expr GEQ expr         { $$ = compare($1, $3, ">=") }
   | expr AND expr         { left := asBool($1); right := asBool($3); $$ = left && right }
   | expr OR expr          { left := asBool($1); right := asBool($3); $$ = left || right }
+  ;
+
+bitManipulation
+  : expr '|' expr         { $$ = asInteger($1) | asInteger($3) }
+  | expr '&' expr         { $$ = asInteger($1) & asInteger($3) }
+  | expr '^' expr         { $$ = asInteger($1) ^ asInteger($3) }
+  ;
 
 varAccess
   : IDENT                 { $$ = accessVar(yylex.(*Lexer).variables, $1.literal) }
@@ -110,6 +122,7 @@ exprList
 exprMap
   : expr ':' expr               { $$ = make(map[string]interface{}); $$[asObjectKey($1)] = $3 }
   | exprMap ',' expr ':' expr   { $$ = addObjectMember($1, $3, $5) }
+  ;
 
 %%
 

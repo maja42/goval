@@ -250,3 +250,26 @@ Examples:
 !!true      // true
 !varName
 ```
+
+## Bit Manipulation
+
+### Logical Or `|`, Logical And `&`, Logical XOr
+
+If one side of the operator is a floating point number, the number is casted to an integer if possible. 
+If decimal places would be lost during that process, it is considered a type error.
+The resulting number is always an integer.
+
+Examples:
+
+```
+8 | 2          // 10
+9 | 5          // 13
+8 | 2.0        // 10
+8 | 2.1        // type error
+
+13 & 10        // 8
+10 & 15.0 & 2  // 2
+
+13 ^ 10        // 7
+10 ^ 15 ^ 1    // 4
+```

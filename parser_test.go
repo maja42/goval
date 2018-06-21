@@ -571,7 +571,6 @@ func Test_Equal_Objects(t *testing.T) {
 }
 
 func assertComparison(t *testing.T, variables map[string]interface{}, v1, v2 interface{}) {
-
 	int1, ok := v1.(int)
 	if ok {
 		int2, ok := v2.(int)
@@ -688,6 +687,51 @@ func Test_Compare_InvalidTypes(t *testing.T) {
 		}
 
 	}
+}
+
+func Test_BitManipulation_Or(t *testing.T) {
+	assertEvaluation(t, nil, 0, "0|0")
+	assertEvaluation(t, nil, 10, "8|2")
+	assertEvaluation(t, nil, 11, "8|2|1")
+	assertEvaluation(t, nil, 15, "8|4|2|1")
+	assertEvaluation(t, nil, 13, "9|5")
+
+	assertEvaluation(t, nil, 10, "8|2.0")
+	assertEvaluation(t, nil, 10, "8.0|2")
+	assertEvaluation(t, nil, 10, "8.0|2.0")
+
+	assertEvalError(t, nil, "type error: cannot cast floating point number to integer without losing precision", "8|2.1")
+	assertEvalError(t, nil, "type error: cannot cast floating point number to integer without losing precision", "8.1|2")
+	assertEvalError(t, nil, "type error: cannot cast floating point number to integer without losing precision", "8.1|2.1")
+}
+
+func Test_BitManipulation_And(t *testing.T) {
+	assertEvaluation(t, nil, 0, "8&2")
+	assertEvaluation(t, nil, 8, "13&10")
+	assertEvaluation(t, nil, 2, "10&15&2")
+
+	assertEvaluation(t, nil, 2, "15&2.0")
+	assertEvaluation(t, nil, 2, "15.0&2")
+	assertEvaluation(t, nil, 2, "15.0&2.0")
+
+	assertEvalError(t, nil, "type error: cannot cast floating point number to integer without losing precision", "15&2.1")
+	assertEvalError(t, nil, "type error: cannot cast floating point number to integer without losing precision", "15.1&2")
+	assertEvalError(t, nil, "type error: cannot cast floating point number to integer without losing precision", "15.1&2.1")
+}
+
+func Test_BitManipulation_XOr(t *testing.T) {
+	assertEvaluation(t, nil, 10, "8^2")
+	assertEvaluation(t, nil, 7, "13^10")
+	assertEvaluation(t, nil, 0, "15^15")
+	assertEvaluation(t, nil, 4, "10^15^1")
+
+	assertEvaluation(t, nil, 7, "13^10.0")
+	assertEvaluation(t, nil, 7, "13.0^10")
+	assertEvaluation(t, nil, 7, "13.0^10.0")
+
+	assertEvalError(t, nil, "type error: cannot cast floating point number to integer without losing precision", "13^10.1")
+	assertEvalError(t, nil, "type error: cannot cast floating point number to integer without losing precision", "13.1^10")
+	assertEvalError(t, nil, "type error: cannot cast floating point number to integer without losing precision", "13.1^10.1")
 }
 
 func Test_VariableAccess_Simple(t *testing.T) {
@@ -1060,5 +1104,7 @@ func getTestVars() map[string]interface{} {
 // TODO:
 // 	bit-operations
 // 	hex-literals
+//  power
 // 	in-operator
 // 	nil literal
+//  array- and string-slices

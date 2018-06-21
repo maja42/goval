@@ -111,6 +111,8 @@ func (l *Lexer) Lex(lval *yySymType) int {
 	case token.ADD, token.SUB, token.MUL, token.QUO, token.REM:
 		tokenType = int(tok.String()[0])
 
+		// Logic
+
 	case token.NOT:
 		tokenType = int(tok.String()[0])
 
@@ -144,6 +146,11 @@ func (l *Lexer) Lex(lval *yySymType) int {
 			value:   nil,
 			literal: "-",
 		}
+
+		// Bit manipulations
+
+	case token.AND, token.OR, token.XOR:
+		tokenType = int(tok.String()[0])
 
 		// Variables
 

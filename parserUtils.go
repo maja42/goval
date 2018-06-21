@@ -38,6 +38,23 @@ func asBool(val interface{}) bool {
 	return b
 }
 
+func asInteger(val interface{}) int {
+	i, ok := val.(int)
+	if ok {
+		return i
+	}
+	f, ok := val.(float64)
+	if !ok {
+		panic(fmt.Errorf("type error: required integer number, but was %s", typeOf(val)))
+	}
+
+	i = int(f)
+	if float64(i) != f {
+		panic(fmt.Errorf("type error: cannot cast floating point number to integer without losing precision"))
+	}
+	return i
+}
+
 func add(val1 interface{}, val2 interface{}) interface{} {
 	str1, str1OK := val1.(string)
 	str2, str2OK := val2.(string)
@@ -406,6 +423,5 @@ func callFunction(functions map[string]ExpressionFunction, name string, args []i
 	if err != nil {
 		panic(fmt.Errorf("function error: %q - %s", name, err))
 	}
-
 	return res
 }
