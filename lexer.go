@@ -19,6 +19,9 @@ type Lexer struct {
 	scanner scanner.Scanner
 	result  interface{}
 
+	nextTokenType int
+	nextTokenInfo Token
+
 	variables map[string]interface{}
 	functions map[string]ExpressionFunction
 }
@@ -61,6 +64,14 @@ func (l *Lexer) Lex(lval *yySymType) int {
 	var tokenType int
 	var err error
 
+	if l.nextTokenType > 0 {
+		// The last scan-operation returned multiple tokens, so we return the remaining one
+		tokenType = l.nextTokenType
+		l.nextTokenType = 0
+		lval.token = l.nextTokenInfo
+		return tokenType
+	}
+
 	pos, tok, lit := l.scan()
 
 	tokenInfo := Token{
@@ -97,7 +108,7 @@ func (l *Lexer) Lex(lval *yySymType) int {
 
 		// Arithmetic
 
-	case token.ADD, token.SUB, token.MUL, token.QUO:
+	case token.ADD, token.SUB, token.MUL, token.QUO, token.REM:
 		tokenType = int(tok.String()[0])
 
 	case token.NOT:
@@ -121,6 +132,18 @@ func (l *Lexer) Lex(lval *yySymType) int {
 		tokenType = LEQ
 	case token.GEQ:
 		tokenType = GEQ
+
+	case token.ARROW:
+		// This token is known by go, but not within our expressions.
+		// Instead, we treat it as two tokens (less and unary-minus).
+		tokenType = LSS
+		tokenInfo.literal = "<"
+		// Remember the minus-operator and omit it the next time:
+		l.nextTokenType = int('-')
+		l.nextTokenInfo = Token{
+			value:   nil,
+			literal: "-",
+		}
 
 		// Variables
 

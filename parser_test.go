@@ -108,7 +108,6 @@ func Test_InvalidLiterals(t *testing.T) {
 	assertEvalError(t, nil, "syntax error: unexpected ']'", `[1, ]`)
 	assertEvalError(t, nil, "syntax error: unexpected ','", `[, 1]`)
 
-
 	assertEvalError(t, nil, "syntax error: unexpected $end", `{`)
 	assertEvalError(t, nil, "syntax error: unexpected '}'", `}`)
 	assertEvalError(t, nil, "syntax error: unexpected '}'", `{"a":}`)
@@ -329,6 +328,27 @@ func Test_Arithmetic_Divide(t *testing.T) {
 	assertEvaluation(t, nil, 1.2/2.5/3, "1.2 / 2.5 / 3")
 }
 
+func Test_Arithmetic_Modulo(t *testing.T) {
+	// int % int
+	assertEvaluation(t, nil, 1, "4 % 3")
+	assertEvaluation(t, nil, 0, "12 % -4")
+	assertEvaluation(t, nil, -55, "-140 % 85")
+	assertEvaluation(t, nil, -1, "-7 % -2")
+	assertEvaluation(t, nil, 8, "8 % 13")
+	// float % float
+	assertEvaluation(t, nil, 1.5, "5.5 % 2.0")
+	assertEvaluation(t, nil, 0.0, "12.0 % 4.0")
+	assertEvaluation(t, nil, -2.0, "-2.0 % 4.5")
+	assertEvaluation(t, nil, -4.0, "-12.5 % -4.25")
+	// int % float
+	assertEvaluation(t, nil, 1.0, "10 % 4.5")
+	// float % int
+	assertEvaluation(t, nil, 1.5, "5.5 % 2")
+
+	assertEvaluation(t, nil, 4, "154 % 12 % 6")
+	assertEvaluation(t, nil, 0.5, "1.5 % 2.5 % 1")
+}
+
 func Test_Arithmetic_InvalidTypes(t *testing.T) {
 	vars := getTestVars()
 	allTypes := []string{"true", "false", "42", "4.2", `"text"`, `"0"`, "[0]", "[]", "arr", `{"a":0}`, "{}", "obj"}
@@ -353,6 +373,9 @@ func Test_Arithmetic_InvalidTypes(t *testing.T) {
 			// /
 			expectedErr = fmt.Sprintf("type error: cannot divide type %s and %s", typ1, typ2)
 			assertEvalError(t, vars, expectedErr, t1+"/"+t2)
+			// %
+			expectedErr = fmt.Sprintf("type error: cannot perform modulo on type %s and %s", typ1, typ2)
+			assertEvalError(t, vars, expectedErr, t1+"%"+t2)
 		}
 
 	}
@@ -545,6 +568,126 @@ func Test_Equal_Objects(t *testing.T) {
 	assertEquality(t, vars, false, "emptyObj", "0")
 	assertEquality(t, vars, false, "emptyObj", "obj1a")
 	assertEquality(t, vars, false, `emptyObj`, `""`)
+}
+
+func assertComparison(t *testing.T, variables map[string]interface{}, v1, v2 interface{}) {
+
+	int1, ok := v1.(int)
+	if ok {
+		int2, ok := v2.(int)
+		if ok {
+			assertEvaluation(t, variables, int1 < int2, fmt.Sprintf("%d<%d", int1, int2))
+			assertEvaluation(t, variables, int1 <= int2, fmt.Sprintf("%d<=%d", int1, int2))
+			assertEvaluation(t, variables, int1 > int2, fmt.Sprintf("%d>%d", int1, int2))
+			assertEvaluation(t, variables, int1 >= int2, fmt.Sprintf("%d>=%d", int1, int2))
+		} else {
+			float2 := v2.(float64)
+			assertEvaluation(t, variables, float64(int1) < float2, fmt.Sprintf("%d<%f", int1, float2))
+			assertEvaluation(t, variables, float64(int1) <= float2, fmt.Sprintf("%d<=%f", int1, float2))
+			assertEvaluation(t, variables, float64(int1) > float2, fmt.Sprintf("%d>%f", int1, float2))
+			assertEvaluation(t, variables, float64(int1) >= float2, fmt.Sprintf("%d>=%f", int1, float2))
+		}
+		return
+	}
+
+	float1 := v1.(float64)
+	int2, ok := v2.(int)
+	if ok {
+		assertEvaluation(t, variables, float1 < float64(int2), fmt.Sprintf("%f<%d", float1, int2))
+		assertEvaluation(t, variables, float1 <= float64(int2), fmt.Sprintf("%f<=%d", float1, int2))
+		assertEvaluation(t, variables, float1 > float64(int2), fmt.Sprintf("%f>%d", float1, int2))
+		assertEvaluation(t, variables, float1 >= float64(int2), fmt.Sprintf("%f>=%d", float1, int2))
+	} else {
+		float2 := v2.(float64)
+		assertEvaluation(t, variables, float1 < float2, fmt.Sprintf("%f<%f", float1, float2))
+		assertEvaluation(t, variables, float1 <= float2, fmt.Sprintf("%f<=%f", float1, float2))
+		assertEvaluation(t, variables, float1 > float2, fmt.Sprintf("%f>%f", float1, float2))
+		assertEvaluation(t, variables, float1 >= float2, fmt.Sprintf("%f>=%f", float1, float2))
+	}
+	return
+}
+
+func Test_Compare(t *testing.T) {
+	// int, int
+	assertComparison(t, nil, 3 , 4)
+	assertComparison(t, nil, -4 , 2)
+	assertComparison(t, nil, 4 , 3)
+	assertComparison(t, nil, 2 , -4)
+	assertComparison(t, nil, 2 , 2)
+
+	// float, float
+	assertComparison(t, nil, 3.5 , 3.51)
+	assertComparison(t, nil, -4.9 , 2.0)
+	assertComparison(t, nil, 3.51 , 3.5)
+	assertComparison(t, nil, 2.1 , -4.0)
+	assertComparison(t, nil, 2.0 , 2.0)
+
+	// int, float
+	assertComparison(t, nil, 3 , 3.1)
+	assertComparison(t, nil, -4 , 2.0)
+	assertComparison(t, nil, 4 , 3.5)
+	assertComparison(t, nil, 2 , -4.0)
+	assertComparison(t, nil, 2 , 2.0)
+
+	// float, int
+	assertComparison(t, nil, 3.5 , 4)
+	assertComparison(t, nil, -4.9 , 2)
+	assertComparison(t, nil, 3.51 , 3)
+	assertComparison(t, nil, 2.1 , -4)
+	assertComparison(t, nil, 2.0 , 2)
+}
+
+func Test_CompareHugeIntegers(t *testing.T) {
+	// these integers can't be represented accurately as floats:
+	i := 999999999999999998
+	j := 999999999999999999
+	assert.True(t, i < j)
+	assert.False(t, float64(i) < float64(j))
+
+	// ... we should be able to deal with them:
+	assertEvaluation(t, nil, true, fmt.Sprintf("%d < %d", i, j))
+	assertEvaluation(t, nil, false, fmt.Sprintf("%d.0 < %d.0", i, j))
+
+	assertEvaluation(t, nil, true, fmt.Sprintf("%d <= %d", i, j))
+	assertEvaluation(t, nil, true, fmt.Sprintf("%d.0 <= %d.0", i, j))
+
+	assertEvaluation(t, nil, true, fmt.Sprintf("%d > %d", j, i))
+	assertEvaluation(t, nil, false, fmt.Sprintf("%d.0 > %d.0", j, i))
+
+	assertEvaluation(t, nil, true, fmt.Sprintf("%d >= %d", j, i))
+	assertEvaluation(t, nil, true, fmt.Sprintf("%d.0 >= %d.0", j, i))
+}
+
+
+func Test_Compare_InvalidTypes(t *testing.T) {
+	vars := getTestVars()
+	allTypes := []string{"true", "false", "42", "4.2", `"text"`, `"0"`, "[0]", "[]", "arr", `{"a":0}`, "{}", "obj"}
+	typeOfAllTypes := []string{"bool", "bool", "number", "number", "string", "string", "array", "array", "array", "object", "object", "object"}
+
+	for idx1, t1 := range allTypes {
+		for idx2, t2 := range allTypes {
+			typ1 := typeOfAllTypes[idx1]
+			typ2 := typeOfAllTypes[idx2]
+
+			if typ1 == "number" && typ2 == "number" {
+				continue
+			}
+
+			// <
+			expectedErr := fmt.Sprintf("type error: cannot compare type %s and %s", typ1, typ2)
+			assertEvalError(t, vars, expectedErr, t1+"<"+t2)
+			// <=
+			expectedErr = fmt.Sprintf("type error: cannot compare type %s and %s", typ1, typ2)
+			assertEvalError(t, vars, expectedErr, t1+"<="+t2)
+			// >
+			expectedErr = fmt.Sprintf("type error: cannot compare type %s and %s", typ1, typ2)
+			assertEvalError(t, vars, expectedErr, t1+">"+t2)
+			// >=
+			expectedErr = fmt.Sprintf("type error: cannot compare type %s and %s", typ1, typ2)
+			assertEvalError(t, vars, expectedErr, t1+">="+t2)
+		}
+
+	}
 }
 
 func Test_VariableAccess_Simple(t *testing.T) {
@@ -913,3 +1056,9 @@ func getTestVars() map[string]interface{} {
 		},
 	}
 }
+
+// TODO:
+// 	bit-operations
+// 	hex-literals
+// 	in-operator
+// 	nil literal

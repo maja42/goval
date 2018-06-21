@@ -42,7 +42,7 @@ package main
 %left  EQL NEQ
 %left  LSS LEQ GTR GEQ
 %left  '+' '-'
-%left  '*' '/'
+%left  '*' '/' '%'
 %right '!'
 %left  '.' '[' ']'
 
@@ -82,12 +82,17 @@ math
   | expr '-' expr         { $$ = sub($1, $3) }
   | expr '*' expr         { $$ = mul($1, $3) }
   | expr '/' expr         { $$ = div($1, $3) }
+  | expr '%' expr         { $$ = mod($1, $3) }
   ;
 
 logic
   : '!' expr              { $$ = !asBool($2) }
   | expr EQL expr         { $$ = deepEqual($1, $3) }
   | expr NEQ expr         { $$ = !deepEqual($1, $3) }
+  | expr LSS expr         { $$ = compare($1, $3, "<") }
+  | expr GTR expr         { $$ = compare($1, $3, ">") }
+  | expr LEQ expr         { $$ = compare($1, $3, "<=") }
+  | expr GEQ expr         { $$ = compare($1, $3, ">=") }
   | expr AND expr         { left := asBool($1); right := asBool($3); $$ = left && right }
   | expr OR expr          { left := asBool($1); right := asBool($3); $$ = left || right }
 

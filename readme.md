@@ -16,11 +16,13 @@ That's how this library was born. The main differences are:
 - Full support for arrays and objects
 - Accessing variables (maps) via `.` and `[]` syntax
 - Differentiation between `int` and `float64`
+- Support for array- and object concatenation
+- Array literals with `[]` as well as object literals with `{}`
 - Type-aware bit-operations (they only work with `int`)
 - No special handling of strings that look like dates
-- Array literals with `[]` as well as object literals with `{}`
 - Useful error messages
 - High performance and highly extensible due to the use of yacc
+- High test coverage
 
 
 # Types
@@ -85,7 +87,7 @@ false
 {"k" + "e" + "y": "value"}
 ```
 
-It is possible to access elements of literals:
+It is possible to access elements of array and object literals:
 
 Examples:
 
@@ -130,6 +132,20 @@ Examples:
 12 - 7 - 5          // 0
 24 / 10             // 2
 24.0 / 10           // 2.4
+```
+
+### Modulo `%`
+
+If both sides are integers, the resulting value is also an integer.
+Otherwise, the result will be a floating point number.
+
+Examples:
+
+```
+4 % 3       // 1
+144 % 85    // -55
+5.5 % 2     // 1.5
+10 % 3.5    // 3.0
 ```
 
 ### Negation `-` (unary minus)
@@ -194,6 +210,21 @@ Examples:
 Performs a deep-compare between the two operands.
 When comparing `int` and `float64`, 
 the integer will be casted to a floating point number.
+
+### Comparisons `<`, `>`, `<=`, `>=`
+
+Compares two numbers. If one side of the operator is an integer and the other is a floating point number,
+the integer number will be casted. This might lead to unexpected results for very big numbers which are rounded
+during that process.
+
+Examples:
+
+```
+3 <-4        // false
+45 > 3.4     // false
+-4 <= -1      // true
+3.5 >= 3.5   // true
+```
 
 ### And `&&`, Or `||`
 

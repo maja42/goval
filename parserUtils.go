@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"math"
 )
 
 func typeOf(val interface{}) string {
@@ -186,6 +187,32 @@ func div(val1 interface{}, val2 interface{}) interface{} {
 	panic(fmt.Errorf("type error: cannot divide type %s and %s", typeOf(val1), typeOf(val2)))
 }
 
+func mod(val1 interface{}, val2 interface{}) interface{} {
+	int1, int1OK := val1.(int)
+	int2, int2OK := val2.(int)
+
+	if int1OK && int2OK {
+		return int1 % int2
+	}
+
+	float1, float1OK := val1.(float64)
+	float2, float2OK := val2.(float64)
+
+	if int1OK {
+		float1 = float64(int1)
+		float1OK = true
+	}
+	if int2OK {
+		float2 = float64(int2)
+		float2OK = true
+	}
+
+	if float1OK && float2OK {
+		return math.Mod(float1, float2)
+	}
+	panic(fmt.Errorf("type error: cannot perform modulo on type %s and %s", typeOf(val1), typeOf(val2)))
+}
+
 func unaryMinus(val interface{}) interface{} {
 	intVal, ok := val.(int)
 	if ok {
@@ -248,6 +275,62 @@ func deepEqual(val1 interface{}, val2 interface{}) bool {
 		return false
 	}
 	return val1 == val2
+}
+
+
+
+func compare(val1 interface{}, val2 interface{}, operation string) bool {
+	int1, int1OK := val1.(int)
+	int2, int2OK := val2.(int)
+
+	if int1OK && int2OK {
+		return compareInt(int1, int2, operation)
+	}
+
+	float1, float1OK := val1.(float64)
+	float2, float2OK := val2.(float64)
+
+	if int1OK {
+		float1 = float64(int1)
+		float1OK = true
+	}
+	if int2OK {
+		float2 = float64(int2)
+		float2OK = true
+	}
+
+	if float1OK && float2OK {
+		return compareFloat(float1, float2, operation)
+	}
+	panic(fmt.Errorf("type error: cannot compare type %s and %s", typeOf(val1), typeOf(val2)))
+}
+
+func compareInt(val1 int, val2 int, operation string) bool {
+	switch operation {
+	case "<":
+		return val1 < val2
+	case "<=":
+		return val1 <= val2
+	case ">":
+		return val1 > val2
+	case ">=":
+		return val1 >= val2
+	}
+	panic(fmt.Errorf("syntax error: unsupported operation %q", operation))
+}
+
+func compareFloat(val1 float64, val2 float64, operation string) bool {
+	switch operation {
+	case "<":
+		return val1 < val2
+	case "<=":
+		return val1 <= val2
+	case ">":
+		return val1 > val2
+	case ">=":
+		return val1 >= val2
+	}
+	panic(fmt.Errorf("syntax error: unsupported operation %q", operation))
 }
 
 func asObjectKey(key interface{}) string {
