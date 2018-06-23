@@ -11,6 +11,8 @@ import (
 //go:generate goyacc.exe -o parser.go parser.go.y
 
 func Test_Literals_Simple(t *testing.T) {
+	assertEvaluation(t, nil, nil, "nil")
+
 	assertEvaluation(t, nil, true, "true")
 	assertEvaluation(t, nil, false, "false")
 
@@ -135,6 +137,7 @@ func Test_Literals_Objects_DuplicateKey(t *testing.T) {
 }
 
 func Test_Literals_Objects_InvalidKeyType(t *testing.T) {
+	assertEvalError(t, nil, "type error: object key must be string, but was nil", `{nil: 0}`)
 	assertEvalError(t, nil, "type error: object key must be string, but was number", `{0: 0}`)
 	assertEvalError(t, nil, "type error: object key must be string, but was number", `{"a": 0, 1: 0}`)
 }
@@ -143,6 +146,7 @@ func Test_MissingOperator(t *testing.T) {
 	assertEvalError(t, nil, "syntax error: unexpected LITERAL_BOOL", "true false")
 	assertEvalError(t, nil, "syntax error: unexpected '!'", "true!")
 	assertEvalError(t, nil, "syntax error: unexpected LITERAL_NUMBER", "42 42")
+	assertEvalError(t, nil, "syntax error: unexpected LITERAL_NIL", "nil nil")
 	assertEvalError(t, nil, "syntax error: unexpected IDENT", "42 var")
 	assertEvalError(t, nil, "syntax error: unexpected IDENT", `42text`)
 	assertEvalError(t, nil, "syntax error: unexpected LITERAL_STRING", `"text" "text"`)
@@ -150,6 +154,7 @@ func Test_MissingOperator(t *testing.T) {
 
 func Test_InvalidLiterals(t *testing.T) {
 	assertEvalError(t, nil, "var error: variable \"bool\" does not exist", "bool")
+	assertEvalError(t, nil, "var error: variable \"null\" does not exist", "null")
 	assertEvalError(t, nil, "syntax error: unexpected LITERAL_NUMBER", `4.2.0`)
 
 	assertEvalError(t, nil, "unknown token \"CHAR\" (\"'t'\") at position 1", `'t'`)
@@ -277,6 +282,7 @@ func Test_Object_Concat(t *testing.T) {
 
 func Test_Add_IncompatibleTypes(t *testing.T) {
 	vars := getTestVars()
+	assertEvalError(t, vars, "type error: cannot add or concatenate type number and nil", `0 + nil`)
 	assertEvalError(t, vars, "type error: cannot add or concatenate type bool and bool", `false + false`)
 	assertEvalError(t, vars, "type error: cannot add or concatenate type bool and bool", `false + true`)
 	assertEvalError(t, vars, "type error: cannot add or concatenate type bool and number", `false + 42`)
@@ -291,6 +297,7 @@ func Test_Add_IncompatibleTypes(t *testing.T) {
 
 	assertEvalError(t, vars, "type error: cannot add or concatenate type array and object", `arr + obj`)
 	assertEvalError(t, vars, "type error: cannot add or concatenate type object and array", `obj + arr`)
+	assertEvalError(t, vars, "type error: cannot add or concatenate type nil and array", `nil + arr`)
 }
 
 func Test_UnaryMinus(t *testing.T) {
@@ -310,6 +317,7 @@ func Test_UnaryMinus(t *testing.T) {
 
 func Test_UnaryMinus_IncompatibleTypes(t *testing.T) {
 	vars := getTestVars()
+	assertEvalError(t, vars, "type error: unary minus requires number, but was nil", "-nil")
 	assertEvalError(t, vars, "type error: unary minus requires number, but was bool", "-true")
 	assertEvalError(t, vars, "type error: unary minus requires number, but was bool", "-false")
 	assertEvalError(t, vars, "type error: unary minus requires number, but was string", `-"0"`)
@@ -406,8 +414,8 @@ func Test_Arithmetic_Modulo(t *testing.T) {
 
 func Test_Arithmetic_InvalidTypes(t *testing.T) {
 	vars := getTestVars()
-	allTypes := []string{"true", "false", "42", "4.2", `"text"`, `"0"`, "[0]", "[]", "arr", `{"a":0}`, "{}", "obj"}
-	typeOfAllTypes := []string{"bool", "bool", "number", "number", "string", "string", "array", "array", "array", "object", "object", "object"}
+	allTypes := []string{"nil", "true", "false", "42", "4.2", `"text"`, `"0"`, "[0]", "[]", "arr", `{"a":0}`, "{}", "obj"}
+	typeOfAllTypes := []string{"nil", "bool", "bool", "number", "number", "string", "string", "array", "array", "array", "object", "object", "object"}
 
 	for idx1, t1 := range allTypes {
 		for idx2, t2 := range allTypes {
@@ -492,8 +500,8 @@ func Test_AndOr_Order(t *testing.T) {
 
 func Test_AndOr_InvalidTypes(t *testing.T) {
 	vars := getTestVars()
-	allTypes := []string{"true", "false", "42", "4.2", `"text"`, `"0"`, "[0]", "[]", "arr", `{"a":0}`, "{}", "obj"}
-	typeOfAllTypes := []string{"bool", "bool", "number", "number", "string", "string", "array", "array", "array", "object", "object", "object"}
+	allTypes := []string{"nil", "true", "false", "42", "4.2", `"text"`, `"0"`, "[0]", "[]", "arr", `{"a":0}`, "{}", "obj"}
+	typeOfAllTypes := []string{"nil", "bool", "bool", "number", "number", "string", "string", "array", "array", "array", "object", "object", "object"}
 
 	for idx1, t1 := range allTypes {
 		for idx2, t2 := range allTypes {
@@ -530,6 +538,10 @@ func assertEquality(t *testing.T, variables map[string]interface{}, equal bool, 
 }
 
 func Test_Equality_Simple(t *testing.T) {
+	assertEquality(t, nil, true, "nil", "nil")
+	assertEquality(t, nil, false, "nil", "false")
+	assertEquality(t, nil, false, "false", "nil")
+
 	assertEquality(t, nil, true, "false", "false")
 	assertEquality(t, nil, true, "true", "true")
 	assertEquality(t, nil, false, "false", "true")
@@ -561,8 +573,8 @@ func Test_Equality_Arrays(t *testing.T) {
 		"null":     nil,
 		"emptyArr": []interface{}{},
 
-		"arr1a": []interface{}{false, true, 42, 4.2, "text", []interface{}{34.0}, map[string]interface{}{"A": 45, "B": 1.2}},
-		"arr1b": []interface{}{false, true, 42.0, 4.2, "text", []interface{}{34}, map[string]interface{}{"B": 1.2, "A": 45}},
+		"arr1a": []interface{}{nil, false, true, 42, 4.2, "text", []interface{}{34.0}, map[string]interface{}{"A": 45, "B": 1.2}},
+		"arr1b": []interface{}{nil, false, true, 42.0, 4.2, "text", []interface{}{34}, map[string]interface{}{"B": 1.2, "A": 45}},
 
 		"arr2": []interface{}{[]interface{}{34.0}, map[string]interface{}{"A": 45, "B": 1.2}, false, true, 42, 4.2, "text"},
 		"arr3": []interface{}{false, true, 42, 4.2, "text"},
@@ -599,8 +611,8 @@ func Test_Equal_Objects(t *testing.T) {
 		"null":     nil,
 		"emptyObj": map[string]interface{}{},
 
-		"obj1a": map[string]interface{}{"a": false, "b": true, "c": 42, "d": 4.2, "e": "text", "f": []interface{}{34.0}, "g": map[string]interface{}{"A": 45, "B": 1.2}},
-		"obj1b": map[string]interface{}{"b": true, "a": false, "c": 42.0, "d": 4.2, "e": "text", "f": []interface{}{34}, "g": map[string]interface{}{"A": 45, "B": 1.2}},
+		"obj1a": map[string]interface{}{"n": nil, "a": false, "b": true, "c": 42, "d": 4.2, "e": "text", "f": []interface{}{34.0}, "g": map[string]interface{}{"A": 45, "B": 1.2}},
+		"obj1b": map[string]interface{}{"n": nil, "b": true, "a": false, "c": 42.0, "d": 4.2, "e": "text", "f": []interface{}{34}, "g": map[string]interface{}{"A": 45, "B": 1.2}},
 
 		"obj2": map[string]interface{}{"a": false, "b": true, "c": 42, "d": 4.2, "e": "text"},
 		"obj3": map[string]interface{}{"a": false, "b": true, "c": 42, "d": 4.2, "e": ""},
@@ -714,8 +726,8 @@ func Test_CompareHugeIntegers(t *testing.T) {
 
 func Test_Compare_InvalidTypes(t *testing.T) {
 	vars := getTestVars()
-	allTypes := []string{"true", "false", "42", "4.2", `"text"`, `"0"`, "[0]", "[]", "arr", `{"a":0}`, "{}", "obj"}
-	typeOfAllTypes := []string{"bool", "bool", "number", "number", "string", "string", "array", "array", "array", "object", "object", "object"}
+	allTypes := []string{"nil", "true", "false", "42", "4.2", `"text"`, `"0"`, "[0]", "[]", "arr", `{"a":0}`, "{}", "obj"}
+	typeOfAllTypes := []string{"nil", "bool", "bool", "number", "number", "string", "string", "array", "array", "array", "object", "object", "object"}
 
 	for idx1, t1 := range allTypes {
 		for idx2, t2 := range allTypes {
@@ -857,8 +869,8 @@ func Test_BitManipulation_NegativeShift(t *testing.T) {
 
 func Test_BitManipulation_InvalidTypes(t *testing.T) {
 	vars := getTestVars()
-	allTypes := []string{"true", "false", "42", "4.0", `"text"`, `"0"`, "[0]", "[]", "arr", `{"a":0}`, "{}", "obj"}
-	typeOfAllTypes := []string{"bool", "bool", "number", "number", "string", "string", "array", "array", "array", "object", "object", "object"}
+	allTypes := []string{"nil", "true", "false", "42", "4.0", `"text"`, `"0"`, "[0]", "[]", "arr", `{"a":0}`, "{}", "obj"}
+	typeOfAllTypes := []string{"nil", "bool", "bool", "number", "number", "string", "string", "array", "array", "array", "object", "object", "object"}
 
 	for idx1, t1 := range allTypes {
 		for idx2, t2 := range allTypes {
@@ -1149,7 +1161,7 @@ func Test_FunctionCall_Simple(t *testing.T) {
 		},
 	}
 
-	tests := map[string]interface{}{`true`: true, `false`: false, `42`: 42, `4.2`: 4.2, `"text"`: "text", `"0"`: "0"}
+	tests := map[string]interface{}{`nil`: nil, `true`: true, `false`: false, `42`: 42, `4.2`: 4.2, `"text"`: "text", `"0"`: "0"}
 
 	for expr, expected := range tests {
 		shouldReturn = expected
@@ -1273,6 +1285,7 @@ func assertEvalErrorFuncs(t *testing.T, variables map[string]interface{}, functi
 
 func getTestVars() map[string]interface{} {
 	return map[string]interface{}{
+		"nl":    nil,
 		"tr":    true,
 		"fl":    false,
 		"int":   42,
@@ -1291,5 +1304,4 @@ func getTestVars() map[string]interface{} {
 // TODO:
 //  bit-not
 // 	in-operator
-// 	nil literal
 //  array- and string-slices

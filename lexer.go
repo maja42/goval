@@ -169,7 +169,9 @@ func (l *Lexer) Lex(lval *yySymType) int {
 		tokenType = SHR
 
 	case token.IDENT:
-		if lit == "true" {
+		if lit == "nil" {
+			tokenType = LITERAL_NIL
+		} else if lit == "true" {
 			tokenType = LITERAL_BOOL
 			tokenInfo.value = true
 		} else if lit == "false" {

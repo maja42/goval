@@ -27,7 +27,7 @@ That's how this library was born. The main differences are:
 
 # Types
 
-This library fully supports the following types: `bool`, `int`, `float64`, `string`, `[]interface{}` (=arrays) and `map[string]interface{}` (=objects). 
+This library fully supports the following types: `nil`, `bool`, `int`, `float64`, `string`, `[]interface{}` (=arrays) and `map[string]interface{}` (=objects). 
 
 If necessary, numerical values will be automatically converted between `int` and `float64`, as long as no precision is lost.
 
@@ -72,6 +72,7 @@ Hex-literals start with the prefix `0x`.
 Examples:
 
 ```
+nil
 true
 false
 3

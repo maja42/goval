@@ -23,6 +23,7 @@ package main
 %type<exprList> exprList
 %type<exprMap> exprMap
 
+%token<token> LITERAL_NIL    // nil
 %token<token> LITERAL_BOOL   // true false
 %token<token> LITERAL_NUMBER // 42 4.2 4e2 4.2e2
 %token<token> LITERAL_STRING // "text" 'text'
@@ -75,7 +76,8 @@ expr
   ;
 
 literal
-  : LITERAL_BOOL          { $$ = $1.value }
+  : LITERAL_NIL           { $$ = nil }
+  | LITERAL_BOOL          { $$ = $1.value }
   | LITERAL_NUMBER        { $$ = $1.value }
   | LITERAL_STRING        { $$ = $1.value }
   | '[' ']'               { $$ = []interface{}{} }

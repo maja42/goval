@@ -8,6 +8,10 @@ import (
 )
 
 func typeOf(val interface{}) string {
+	if val == nil {
+		return "nil"
+	}
+
 	kind := reflect.TypeOf(val).Kind()
 
 	switch kind {
