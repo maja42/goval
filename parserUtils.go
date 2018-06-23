@@ -417,6 +417,20 @@ func accessField(s interface{}, field interface{}) interface{} {
 	return nil
 }
 
+func arrayContains(arr interface{}, val interface{}) bool {
+	a, ok := arr.([]interface{})
+	if !ok {
+		panic(fmt.Errorf("syntax error: in-operator requires array, but was %s", typeOf(arr)))
+	}
+
+	for _, v := range a {
+		if deepEqual(v, val) {
+			return true
+		}
+	}
+	return false
+}
+
 func callFunction(functions map[string]ExpressionFunction, name string, args []interface{}) interface{} {
 	f, ok := functions[name]
 	if !ok {

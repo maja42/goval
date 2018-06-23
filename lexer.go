@@ -177,6 +177,8 @@ func (l *Lexer) Lex(lval *yySymType) int {
 		} else if lit == "false" {
 			tokenType = LITERAL_BOOL
 			tokenInfo.value = false
+		} else if lit == "in" || lit == "IN" {
+			tokenType = IN
 		} else {
 			tokenType = IDENT
 		}

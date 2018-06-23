@@ -1172,6 +1172,76 @@ func Test_VariableAccess_DynamicAccess(t *testing.T) {
 	assertEvaluation(t, vars, 43, `obj[ arr[obj["a"] + 3] ]`)
 }
 
+func Test_In(t *testing.T) {
+	obj := map[string]interface{}{
+		"a": 3,
+		"b": 4.0,
+		"c": 5.5,
+	}
+	arr := []interface{}{
+		nil, true, false, 42, 4.2, 8.0, "", "abc", []interface{}{}, []interface{}{0, 1.0, 2.4}, obj,
+	}
+	vars := map[string]interface{}{
+		"num":   42,
+		"empty": []interface{}{},
+		"obj": obj,
+
+		"arr": arr,
+	}
+
+	assertEvaluation(t, vars, false, `nil in []`)
+	assertEvaluation(t, vars, false, `false in []`)
+	assertEvaluation(t, vars, false, `true in [false]`)
+
+	assertEvaluation(t, vars, true, `1 in [1]`)
+	assertEvaluation(t, vars, true, `1 in [1.0]`)
+	assertEvaluation(t, vars, true, `1.0 in [1]`)
+	assertEvaluation(t, vars, true, `1.0 in [1.0]`)
+	assertEvaluation(t, vars, true, `1 IN [1]`)
+
+	assertEvaluation(t, vars, true, `false in [false, true]`)
+	assertEvaluation(t, vars, true, `true in [false, true]`)
+
+	assertEvaluation(t, vars, true, `nil in arr`)
+	assertEvaluation(t, vars, true, `true in arr`)
+	assertEvaluation(t, vars, true, `false in arr`)
+	assertEvaluation(t, vars, true, `42 in arr`)
+	assertEvaluation(t, vars, true, `42.0 in arr`)
+	assertEvaluation(t, vars, true, `4.2 in arr`)
+	assertEvaluation(t, vars, true, `8.0 in arr`)
+	assertEvaluation(t, vars, true, `8 in arr`)
+	assertEvaluation(t, vars, true, `"" in arr`)
+	assertEvaluation(t, vars, true, `"abc" in arr`)
+	assertEvaluation(t, vars, true, `[] in arr`)
+	assertEvaluation(t, vars, true, `[0, 1.0, 2.4] in arr`)
+	assertEvaluation(t, vars, true, `[0.0, 1, 2.4] in arr`)
+	assertEvaluation(t, vars, true, `{"a":3, "b": 4.0, "c": 5.5} in arr`)
+	assertEvaluation(t, vars, true, `{"a":3.0, "c": 5.5, "b": 4} in arr`)
+
+	assertEvaluation(t, vars, false, `8.01 in arr`)
+	assertEvaluation(t, vars, false, `[nil] in arr`)
+	assertEvaluation(t, vars, false, `[0, 1.0] in arr`)
+	assertEvaluation(t, vars, false, `1.0 in arr`)
+
+	assertEvaluation(t, vars, false, `{"a":3, "b": 4.0} in arr`)
+	assertEvaluation(t, vars, false, `{} in arr`)
+
+	assertEvaluation(t, vars, true, `empty in arr`)
+	assertEvaluation(t, vars, true, `num in arr`)
+	assertEvaluation(t, vars, true, `obj in arr`)
+	assertEvaluation(t, vars, false, `arr in arr`)
+}
+
+func Test_In_InvalidTypes(t *testing.T) {
+	assertEvalError(t, nil, "syntax error: in-operator requires array, but was nil", "0 in nil")
+	assertEvalError(t, nil, "syntax error: in-operator requires array, but was bool", "0 in true")
+	assertEvalError(t, nil, "syntax error: in-operator requires array, but was bool", "0 in false")
+	assertEvalError(t, nil, "syntax error: in-operator requires array, but was number", "0 in 42")
+	assertEvalError(t, nil, "syntax error: in-operator requires array, but was number", "0 in 4.2")
+	assertEvalError(t, nil, "syntax error: in-operator requires array, but was string", `0 in "text"`)
+	assertEvalError(t, nil, "syntax error: in-operator requires array, but was object", "0 in {}")
+}
+
 func Test_FunctionCall_Simple(t *testing.T) {
 	var shouldReturn interface{}
 	var expectedArg interface{}
@@ -1333,5 +1403,4 @@ func getTestVars() map[string]interface{} {
 // }
 
 // TODO:
-// 	in-operator
 //  array- and string-slices

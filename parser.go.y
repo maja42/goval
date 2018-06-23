@@ -39,6 +39,7 @@ package main
 %token<token> SHL            // <<
 %token<token> SHR            // >>
 %token<token> BIT_NOT        // ~
+%token<token> IN             // in
 
 /* Operator precedence is taken from C/C++: http://en.cppreference.com/w/c/language/operator_precedence */
 
@@ -53,6 +54,7 @@ package main
 %left  '+' '-'
 %left  '*' '/' '%'
 %right '!' BIT_NOT
+%left  IN
 %left  '.' '[' ']'
 
 %%
@@ -121,6 +123,7 @@ varAccess
   : IDENT                 { $$ = accessVar(yylex.(*Lexer).variables, $1.literal) }
   | expr '.' IDENT        { $$ = accessField($1, $3.literal) }
   | expr '[' expr ']'     { $$ = accessField($1, $3) }
+  | expr IN expr          { $$ = arrayContains($3, $1) }
   ;
 
 exprList
