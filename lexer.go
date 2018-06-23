@@ -6,7 +6,11 @@ import (
 	"strconv"
 	"errors"
 	"fmt"
+	"strings"
+	"unsafe"
 )
+
+const bitSizeOfInt = int(unsafe.Sizeof(0)) * 8
 
 type Expression interface{}
 
@@ -88,7 +92,14 @@ func (l *Lexer) Lex(lval *yySymType) int {
 
 	case token.INT:
 		tokenType = LITERAL_NUMBER
-		tokenInfo.value, err = strconv.Atoi(lit)
+		hex := strings.TrimPrefix(lit, "0x")
+		if len(hex) < len(lit) {
+			var hexVal uint64
+			hexVal, err = strconv.ParseUint(hex, 16, bitSizeOfInt)
+			tokenInfo.value = int(hexVal)
+		} else {
+			tokenInfo.value, err = strconv.Atoi(lit)
+		}
 		if err != nil {
 			l.Perrorf(pos, "parse error: cannot parse integer")
 		}
@@ -201,3 +212,5 @@ func (l *Lexer) Perrorf(pos token.Pos, format string, a ...interface{}) {
 	}
 	panic(fmt.Errorf(format, a...))
 }
+
+

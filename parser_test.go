@@ -34,6 +34,56 @@ func Test_Literals_Simple(t *testing.T) {
 	assertEvaluation(t, nil, "\t\t\n\xFF\u0100.+=!", `"\t	\n\xFF\u0100.+=!"`)
 }
 
+
+func Test_Literals_Hex(t *testing.T) {
+	assertEvaluation(t, nil, 0, "0x0")
+	assertEvaluation(t, nil, 1, "0x01")
+	assertEvaluation(t, nil, 10, "0x0A")
+	assertEvaluation(t, nil, 255, "0xFF")
+	assertEvaluation(t, nil, 42330, "0xA55A")
+	assertEvaluation(t, nil, 23205, "0x5AA5")
+	assertEvaluation(t, nil, 65535,      "0xFFFF") // 16bit
+
+	result, err := evaluate("0x7FFFFFFF", nil, nil) // 32bit, leading zero
+	if assert.NoError(t, err) {
+		assert.Equal(t, int64(2147483647), int64(result.(int)))
+	}
+
+	if bitSizeOfInt == 32 {
+		result, err = evaluate("0x80000000", nil, nil) // 32bit, leading one (highest negative)
+		if assert.NoError(t, err) {
+			assert.Equal(t, int32(-2147483648), int32(result.(int)))
+		}
+
+		result, err = evaluate("0xFFFFFFFF", nil, nil) // 32bit, leading one (lowest negative)
+		if assert.NoError(t, err) {
+			assert.Equal(t, int32(-1), int32(result.(int)))
+		}
+	}
+
+	if bitSizeOfInt >= 64 {
+		result, err = evaluate("0xFFFFFFFF", nil, nil) // 32bit
+		if assert.NoError(t, err) {
+			assert.Equal(t, int64(4294967295), int64(result.(int)))
+		}
+
+		result, err = evaluate("0x7FFFFFFFFFFFFFFF", nil, nil) // 64bit, leading zero (highest positive)
+		if assert.NoError(t, err) {
+			assert.Equal(t, int64(9223372036854775807), int64(result.(int)))
+		}
+
+		result, err = evaluate("0x8000000000000000", nil, nil) // 64bit, leading one (highest negative)
+		if assert.NoError(t, err) {
+			assert.Equal(t, int64(-9223372036854775808), int64(result.(int)))
+		}
+
+		result, err = evaluate("0xFFFFFFFFFFFFFFFF", nil, nil) // 64bit, leading one (lowest negative)
+		if assert.NoError(t, err) {
+			assert.Equal(t, int64(-1), int64(result.(int)))
+		}
+	}
+}
+
 func Test_Literals_Arrays(t *testing.T) {
 	assertEvaluation(t, nil, []interface{}{}, `[]`)
 	assertEvaluation(t, nil, []interface{}{1, 2, 3}, `[1, 2, 3]`)
@@ -71,6 +121,12 @@ func Test_Literals_Objects_DynamicKeys(t *testing.T) {
 }
 
 func Test_LiteralsOutOfRange(t *testing.T) {
+	if bitSizeOfInt == 32 {
+		assertEvalError(t, nil, "parse error: cannot parse integer at position 1", "0x100000000") // 33bit
+	} else {
+		assertEvalError(t, nil, "parse error: cannot parse integer at position 1", "0x10000000000000000") // 65bit
+	}
+
 	assertEvalError(t, nil, "parse error: cannot parse integer at position 1", "9999999999999999999999999999")
 	assertEvalError(t, nil, "parse error: cannot parse float at position 1", "9.9e999")
 }
@@ -1038,6 +1094,10 @@ func Test_InvalidFunctionCalls(t *testing.T) {
 	assertEvalErrorFuncs(t, vars, functions, "syntax error: unexpected ','", `func((1, 2))`)
 }
 
+
+// func Test_TokenExperiment(t *testing.T) {
+// 	tokenize("0x234abfe")
+// }
 // func tokenize(src string) {
 // 	var scanner scanner.Scanner
 // 	fset := token.NewFileSet()
@@ -1102,7 +1162,8 @@ func getTestVars() map[string]interface{} {
 }
 
 // TODO:
-// 	bit-operations
+// 	bit-shift
+//  bit-not
 // 	hex-literals
 //  power
 // 	in-operator

@@ -66,7 +66,8 @@ len("te" + "xt")
 # Literals
 
 Any literal can be defined within expressions. 
-String literals can be put in double-quotes " or back-ticks `.
+String literals can be put in double-quotes `"` or back-ticks \`.
+Hex-literals start with the prefix `0x`.
 
 Examples:
 
@@ -85,6 +86,12 @@ false
 {"a": 1, "b": {c: 3}}
 {"key" + 42: "value"}
 {"k" + "e" + "y": "value"}
+
+0xA                 // 10
+0x0A                // 10
+0xFF                // 255 
+0xFFFFFFFF          // 32bit appl.: -1  64bit appl.: 4294967295
+0xFFFFFFFFFFFFFFFF  // 64bit appl.: -1  32bit appl.: error
 ```
 
 It is possible to access elements of array and object literals:
@@ -222,7 +229,7 @@ Examples:
 ```
 3 <-4        // false
 45 > 3.4     // false
--4 <= -1      // true
+-4 <= -1     // true
 3.5 >= 3.5   // true
 ```
 
@@ -253,7 +260,7 @@ Examples:
 
 ## Bit Manipulation
 
-### Logical Or `|`, Logical And `&`, Logical XOr
+### Logical Or `|`, Logical And `&`, Logical XOr `^`
 
 If one side of the operator is a floating point number, the number is casted to an integer if possible. 
 If decimal places would be lost during that process, it is considered a type error.
