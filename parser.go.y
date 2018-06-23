@@ -35,6 +35,8 @@ package main
 %token<token> GTR            // >
 %token<token> LEQ            // <=
 %token<token> GEQ            // >=
+%token<token> SHL            // <<
+%token<token> SHR            // >>
 
 /* Operator precedence is taken from C/C++: http://en.cppreference.com/w/c/language/operator_precedence */
 
@@ -45,6 +47,7 @@ package main
 %left  '&'
 %left  EQL NEQ
 %left  LSS LEQ GTR GEQ
+%left  SHL SHR
 %left  '+' '-'
 %left  '*' '/' '%'
 %right '!'
@@ -106,6 +109,8 @@ bitManipulation
   : expr '|' expr         { $$ = asInteger($1) | asInteger($3) }
   | expr '&' expr         { $$ = asInteger($1) & asInteger($3) }
   | expr '^' expr         { $$ = asInteger($1) ^ asInteger($3) }
+  | expr SHL expr         { l := asInteger($1); r := asInteger($3); if r >= 0 { $$ = l << uint(r) } else {$$ = l >> uint(-r)} }
+  | expr SHR expr         { l := asInteger($1); r := asInteger($3); if r >= 0 { $$ = l >> uint(r) } else {$$ = l << uint(-r)} }
   ;
 
 varAccess

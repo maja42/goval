@@ -45,7 +45,7 @@ func asInteger(val interface{}) int {
 	}
 	f, ok := val.(float64)
 	if !ok {
-		panic(fmt.Errorf("type error: required integer number, but was %s", typeOf(val)))
+		panic(fmt.Errorf("type error: required number of type integer, but was %s", typeOf(val)))
 	}
 
 	i = int(f)

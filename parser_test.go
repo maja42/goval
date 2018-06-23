@@ -34,7 +34,6 @@ func Test_Literals_Simple(t *testing.T) {
 	assertEvaluation(t, nil, "\t\t\n\xFF\u0100.+=!", `"\t	\n\xFF\u0100.+=!"`)
 }
 
-
 func Test_Literals_Hex(t *testing.T) {
 	assertEvaluation(t, nil, 0, "0x0")
 	assertEvaluation(t, nil, 1, "0x01")
@@ -42,7 +41,7 @@ func Test_Literals_Hex(t *testing.T) {
 	assertEvaluation(t, nil, 255, "0xFF")
 	assertEvaluation(t, nil, 42330, "0xA55A")
 	assertEvaluation(t, nil, 23205, "0x5AA5")
-	assertEvaluation(t, nil, 65535,      "0xFFFF") // 16bit
+	assertEvaluation(t, nil, 65535, "0xFFFF") // 16bit
 
 	result, err := evaluate("0x7FFFFFFF", nil, nil) // 32bit, leading zero
 	if assert.NoError(t, err) {
@@ -664,32 +663,32 @@ func assertComparison(t *testing.T, variables map[string]interface{}, v1, v2 int
 
 func Test_Compare(t *testing.T) {
 	// int, int
-	assertComparison(t, nil, 3 , 4)
-	assertComparison(t, nil, -4 , 2)
-	assertComparison(t, nil, 4 , 3)
-	assertComparison(t, nil, 2 , -4)
-	assertComparison(t, nil, 2 , 2)
+	assertComparison(t, nil, 3, 4)
+	assertComparison(t, nil, -4, 2)
+	assertComparison(t, nil, 4, 3)
+	assertComparison(t, nil, 2, -4)
+	assertComparison(t, nil, 2, 2)
 
 	// float, float
-	assertComparison(t, nil, 3.5 , 3.51)
-	assertComparison(t, nil, -4.9 , 2.0)
-	assertComparison(t, nil, 3.51 , 3.5)
-	assertComparison(t, nil, 2.1 , -4.0)
-	assertComparison(t, nil, 2.0 , 2.0)
+	assertComparison(t, nil, 3.5, 3.51)
+	assertComparison(t, nil, -4.9, 2.0)
+	assertComparison(t, nil, 3.51, 3.5)
+	assertComparison(t, nil, 2.1, -4.0)
+	assertComparison(t, nil, 2.0, 2.0)
 
 	// int, float
-	assertComparison(t, nil, 3 , 3.1)
-	assertComparison(t, nil, -4 , 2.0)
-	assertComparison(t, nil, 4 , 3.5)
-	assertComparison(t, nil, 2 , -4.0)
-	assertComparison(t, nil, 2 , 2.0)
+	assertComparison(t, nil, 3, 3.1)
+	assertComparison(t, nil, -4, 2.0)
+	assertComparison(t, nil, 4, 3.5)
+	assertComparison(t, nil, 2, -4.0)
+	assertComparison(t, nil, 2, 2.0)
 
 	// float, int
-	assertComparison(t, nil, 3.5 , 4)
-	assertComparison(t, nil, -4.9 , 2)
-	assertComparison(t, nil, 3.51 , 3)
-	assertComparison(t, nil, 2.1 , -4)
-	assertComparison(t, nil, 2.0 , 2)
+	assertComparison(t, nil, 3.5, 4)
+	assertComparison(t, nil, -4.9, 2)
+	assertComparison(t, nil, 3.51, 3)
+	assertComparison(t, nil, 2.1, -4)
+	assertComparison(t, nil, 2.0, 2)
 }
 
 func Test_CompareHugeIntegers(t *testing.T) {
@@ -712,7 +711,6 @@ func Test_CompareHugeIntegers(t *testing.T) {
 	assertEvaluation(t, nil, true, fmt.Sprintf("%d >= %d", j, i))
 	assertEvaluation(t, nil, true, fmt.Sprintf("%d.0 >= %d.0", j, i))
 }
-
 
 func Test_Compare_InvalidTypes(t *testing.T) {
 	vars := getTestVars()
@@ -788,6 +786,136 @@ func Test_BitManipulation_XOr(t *testing.T) {
 	assertEvalError(t, nil, "type error: cannot cast floating point number to integer without losing precision", "13^10.1")
 	assertEvalError(t, nil, "type error: cannot cast floating point number to integer without losing precision", "13.1^10")
 	assertEvalError(t, nil, "type error: cannot cast floating point number to integer without losing precision", "13.1^10.1")
+}
+
+func Test_BitManipulation_Shift(t *testing.T) {
+	assertEvaluation(t, nil, 1, "0x01 << 0")
+	assertEvaluation(t, nil, 2, "0x01 << 1")
+	assertEvaluation(t, nil, 4, "0x01 << 2")
+	assertEvaluation(t, nil, 24, "0x03 << 3")
+
+	if bitSizeOfInt == 32 {
+		assertEvaluation(t, nil, -2147483648, "0x01 << 31") // 32bit, leading one (highest negative)
+		assertEvaluation(t, nil, 0, "0x01 << 32")           // 32bit, truncated
+	} else if bitSizeOfInt == 64 {
+		assertEvaluation(t, nil, -9223372036854775808, "0x01 << 63") // 64bit, leading one (highest negative)
+		assertEvaluation(t, nil, 0, "0x01 << 64")                    // 64bit, truncated
+	}
+
+	if bitSizeOfInt == 32 {
+		assertEvaluation(t, nil, 1, "0x40000000 >> 30")
+		assertEvaluation(t, nil, 2, "0x40000000 >> 28")
+		assertEvaluation(t, nil, 4, "0x40000000 >> 28")
+		assertEvaluation(t, nil, 12, "0x60000000 >> 27")
+
+		assertEvaluation(t, nil, 0, "0x40000000 >> 31")  // underflow
+		assertEvaluation(t, nil, -1, "0x80000000 >> 31") // sign extension
+	} else if bitSizeOfInt == 64 {
+		assertEvaluation(t, nil, 1, "0x4000000000000000 >> 62")
+		assertEvaluation(t, nil, 2, "0x4000000000000000 >> 61")
+		assertEvaluation(t, nil, 4, "0x4000000000000000 >> 60")
+		assertEvaluation(t, nil, 12, "0x6000000000000000 >> 59")
+
+		assertEvaluation(t, nil, 0, "0x4000000000000000 >> 63")  // underflow
+		assertEvaluation(t, nil, -1, "0x8000000000000000 >> 63") // sign extension
+	}
+}
+
+func Test_BitManipulation_NegativeShift(t *testing.T) {
+	assertEvaluation(t, nil, 0, "0x01 << -1") // underflow
+
+	assertEvaluation(t, nil, 2, "0x01 >> -1")
+	assertEvaluation(t, nil, 4, "0x01 >> -2")
+	assertEvaluation(t, nil, 24, "0x03 >> -3")
+
+	if bitSizeOfInt == 32 {
+		assertEvaluation(t, nil, -2147483648, "0x01 >> -31") // 32bit, leading one (highest negative)
+		assertEvaluation(t, nil, 0, "0x01 >> -32")           // 32bit, truncated
+	} else if bitSizeOfInt == 64 {
+		assertEvaluation(t, nil, -9223372036854775808, "0x01 >> -63") // 64bit, leading one (highest negative)
+		assertEvaluation(t, nil, 0, "0x01 >> -64")                    // 64bit, truncated
+	}
+
+	if bitSizeOfInt == 32 {
+		assertEvaluation(t, nil, 1, "0x40000000 << -30")
+		assertEvaluation(t, nil, 2, "0x40000000 << -28")
+		assertEvaluation(t, nil, 4, "0x40000000 << -28")
+		assertEvaluation(t, nil, 12, "0x60000000 << -27")
+
+		assertEvaluation(t, nil, 0, "0x40000000 << -31")  // underflow
+		assertEvaluation(t, nil, -1, "0x80000000 << -31") // sign extension
+	} else if bitSizeOfInt == 64 {
+		assertEvaluation(t, nil, 1, "0x4000000000000000 << -62")
+		assertEvaluation(t, nil, 2, "0x4000000000000000 << -61")
+		assertEvaluation(t, nil, 4, "0x4000000000000000 << -60")
+		assertEvaluation(t, nil, 12, "0x6000000000000000 << -59")
+
+		assertEvaluation(t, nil, 0, "0x4000000000000000 << -63")  // underflow
+		assertEvaluation(t, nil, -1, "0x8000000000000000 << -63") // sign extension
+	}
+}
+
+func Test_BitManipulation_InvalidTypes(t *testing.T) {
+	vars := getTestVars()
+	allTypes := []string{"true", "false", "42", "4.0", `"text"`, `"0"`, "[0]", "[]", "arr", `{"a":0}`, "{}", "obj"}
+	typeOfAllTypes := []string{"bool", "bool", "number", "number", "string", "string", "array", "array", "array", "object", "object", "object"}
+
+	for idx1, t1 := range allTypes {
+		for idx2, t2 := range allTypes {
+			typ1 := typeOfAllTypes[idx1]
+			typ2 := typeOfAllTypes[idx2]
+
+			if typ1 == "number" && typ2 == "number" {
+				continue
+			}
+
+			nonIntType := typ1
+			if typ1 == "number" {
+				nonIntType = typ2
+			}
+			// &
+			expectedErr := fmt.Sprintf("type error: required number of type integer, but was %s", nonIntType)
+			assertEvalError(t, vars, expectedErr, t1+"&"+t2)
+			// |
+			expectedErr = fmt.Sprintf("type error: required number of type integer, but was %s", nonIntType)
+			assertEvalError(t, vars, expectedErr, t1+"|"+t2)
+			// ^
+			expectedErr = fmt.Sprintf("type error: required number of type integer, but was %s", nonIntType)
+			assertEvalError(t, vars, expectedErr, t1+"^"+t2)
+			// <<
+			expectedErr = fmt.Sprintf("type error: required number of type integer, but was %s", nonIntType)
+			assertEvalError(t, vars, expectedErr, t1+"<<"+t2)
+			// >>
+			expectedErr = fmt.Sprintf("type error: required number of type integer, but was %s", nonIntType)
+			assertEvalError(t, vars, expectedErr, t1+">>"+t2)
+		}
+
+	}
+}
+
+func Test_BitManipulation_CannotCastFloat(t *testing.T) {
+	expectedErr := "type error: cannot cast floating point number to integer without losing precision"
+
+	// &
+	assertEvalError(t, nil, expectedErr, "0 & 4.2")
+	assertEvalError(t, nil, expectedErr, "4.2 & 0")
+	assertEvalError(t, nil, expectedErr, "4.2 & 4.2")
+	// |
+	assertEvalError(t, nil, expectedErr, "0 | 4.2")
+	assertEvalError(t, nil, expectedErr, "4.2 | 0")
+	assertEvalError(t, nil, expectedErr, "4.2 | 4.2")
+	// ^
+	assertEvalError(t, nil, expectedErr, "0 ^ 4.2")
+	assertEvalError(t, nil, expectedErr, "4.2 ^ 0")
+	assertEvalError(t, nil, expectedErr, "4.2 ^ 4.2")
+	// <<
+	assertEvalError(t, nil, expectedErr, "0 << 4.2")
+	assertEvalError(t, nil, expectedErr, "4.2 << 0")
+	assertEvalError(t, nil, expectedErr, "4.2 << 4.2")
+	// >>
+	assertEvalError(t, nil, expectedErr, "0 >> 4.2")
+	assertEvalError(t, nil, expectedErr, "4.2 >> 0")
+	assertEvalError(t, nil, expectedErr, "4.2 >> 4.2")
 }
 
 func Test_VariableAccess_Simple(t *testing.T) {
@@ -1094,9 +1222,8 @@ func Test_InvalidFunctionCalls(t *testing.T) {
 	assertEvalErrorFuncs(t, vars, functions, "syntax error: unexpected ','", `func((1, 2))`)
 }
 
-
 // func Test_TokenExperiment(t *testing.T) {
-// 	tokenize("0x234abfe")
+// 	tokenize("0b0101")
 // }
 // func tokenize(src string) {
 // 	var scanner scanner.Scanner
@@ -1162,10 +1289,7 @@ func getTestVars() map[string]interface{} {
 }
 
 // TODO:
-// 	bit-shift
 //  bit-not
-// 	hex-literals
-//  power
 // 	in-operator
 // 	nil literal
 //  array- and string-slices

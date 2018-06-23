@@ -280,3 +280,34 @@ Examples:
 13 ^ 10        // 7
 10 ^ 15 ^ 1    // 4
 ```
+
+
+### Bit-Shift `<<`, `>>`
+
+If one side of the operator is a floating point number, the number is casted to an integer if possible. 
+If decimal places would be lost during that process, it is considered a type error.
+The resulting number is always an integer.
+
+When shifting to the right, sign-extension is performed.
+The results can differ between 32bit and 64bit architectures.
+
+Examples:
+
+```
+1 << 0    // 1
+1 << 1    // 2
+1 << 2    // 4
+8 << -1   // 4
+8 >> -1   // 16
+
+1 << 31   // 0x00000000 80000000   64bit appl.: 2147483648; 32bit appl.: -2147483648
+1 << 32   // 0x00000001 00000000   32bit appl.: 0 (overflow)
+
+1 << 63   // 0x80000000 00000000   32bit appl.: 0 (overflow); 64bit appl.: -9223372036854775808
+1 << 64   // 0x00000000 00000000   0 (overflow)
+
+0x80000000 00000000 >> 63     // 0xFFFFFFFF FFFFFFFF   64bit: -1 (sign extension); 32bit: error (cannot parse number literal)
+0x80000000 >> 31              // 64bit: 0x00000000 0000001; 32bit: 0xFFFFFFFF (-1, sign extension)
+```
+
+

@@ -163,7 +163,10 @@ func (l *Lexer) Lex(lval *yySymType) int {
 	case token.AND, token.OR, token.XOR:
 		tokenType = int(tok.String()[0])
 
-		// Variables
+	case token.SHL:
+		tokenType = SHL
+	case token.SHR:
+		tokenType = SHR
 
 	case token.IDENT:
 		if lit == "true" {
@@ -212,5 +215,3 @@ func (l *Lexer) Perrorf(pos token.Pos, format string, a ...interface{}) {
 	}
 	panic(fmt.Errorf(format, a...))
 }
-
-
