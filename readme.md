@@ -21,7 +21,7 @@ That's how this library was born. The main differences are:
 - Type-aware bit-operations (they only work with `int`)
 - No special handling of strings that look like dates
 - Useful error messages
-- High performance and highly extensible due to the use of yacc
+- High performance and high extensibility due to the use of go/scanner and yacc
 - High test coverage
 
 
@@ -282,6 +282,24 @@ Examples:
 10 ^ 15 ^ 1    // 4
 ```
 
+### Bitwise Not `~`
+
+If performed on a floating point number, the number is casted to an integer if possible. 
+If decimal places would be lost during that process, it is considered a type error.
+The resulting number is always an integer.
+
+The results can differ between 32bit and 64bit architectures.
+
+Examples:
+
+```
+~-1                   // 0
+(~0xA55A) & 0xFFFF    // 0x5AA5
+(~0x5AA5) & 0xFFFF    // 0xA55A
+
+~0xFFFFFFFF           // 64bit appl.: 0xFFFFFFFF 00000000; 32bit appl.: 0x00
+~0xFFFFFFFF FFFFFFFF  // 64bit appl.: 0x00; 32bit: error
+```
 
 ### Bit-Shift `<<`, `>>`
 

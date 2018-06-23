@@ -152,6 +152,12 @@ func Test_MissingOperator(t *testing.T) {
 	assertEvalError(t, nil, "syntax error: unexpected LITERAL_STRING", `"text" "text"`)
 }
 
+func Test_UnsupportedTokens(t *testing.T) {
+	assertEvalError(t, nil, "unknown token \"ILLEGAL\" (\"§\") at position 3", "0 § 0")
+	assertEvalError(t, nil, "unknown token \"...\" (\"\") at position 3", "0 ... 0")
+	assertEvalError(t, nil, "unknown token \"+=\" (\"\") at position 3", "0 += 0")
+}
+
 func Test_InvalidLiterals(t *testing.T) {
 	assertEvalError(t, nil, "var error: variable \"bool\" does not exist", "bool")
 	assertEvalError(t, nil, "var error: variable \"null\" does not exist", "null")
@@ -800,6 +806,31 @@ func Test_BitManipulation_XOr(t *testing.T) {
 	assertEvalError(t, nil, "type error: cannot cast floating point number to integer without losing precision", "13.1^10.1")
 }
 
+func Test_BitManipulation_Not(t *testing.T) {
+	assertEvaluation(t, nil, 0, "~-1")
+	assertEvaluation(t, nil, 0, "~-1.0")
+	assertEvaluation(t, nil, 0x5AA5, "(~0xA55A) & 0xFFFF")
+	assertEvaluation(t, nil, 0xA55A, "(~0x5AA5) & 0xFFFF")
+
+	if bitSizeOfInt == 32 {
+		assertEvaluation(t, nil, -1, "~0")
+		assertEvaluation(t, nil, 0, "~0xFFFFFFFF")
+	} else if bitSizeOfInt == 64 {
+		assertEvaluation(t, nil, -1, "~0")
+		assertEvaluation(t, nil, 0, "~0xFFFFFFFFFFFFFFFF")
+	}
+}
+
+func Test_BitManipulation_Not_InvalidTypes(t *testing.T) {
+	assertEvalError(t, nil, "type error: required number of type integer, but was nil", "~nil")
+	assertEvalError(t, nil, "type error: required number of type integer, but was bool", "~true")
+	assertEvalError(t, nil, "type error: required number of type integer, but was bool", "~false")
+	assertEvalError(t, nil, "type error: cannot cast floating point number to integer without losing precision", "~4.2")
+	assertEvalError(t, nil, "type error: required number of type integer, but was string", `~"text"`)
+	assertEvalError(t, nil, "type error: required number of type integer, but was array", "~[]")
+	assertEvalError(t, nil, "type error: required number of type integer, but was object", "~{}")
+}
+
 func Test_BitManipulation_Shift(t *testing.T) {
 	assertEvaluation(t, nil, 1, "0x01 << 0")
 	assertEvaluation(t, nil, 2, "0x01 << 1")
@@ -1234,24 +1265,6 @@ func Test_InvalidFunctionCalls(t *testing.T) {
 	assertEvalErrorFuncs(t, vars, functions, "syntax error: unexpected ','", `func((1, 2))`)
 }
 
-// func Test_TokenExperiment(t *testing.T) {
-// 	tokenize("0b0101")
-// }
-// func tokenize(src string) {
-// 	var scanner scanner.Scanner
-// 	fset := token.NewFileSet()
-// 	file := fset.AddFile("", fset.Base(), len(src))
-// 	scanner.Init(file, []byte(src), nil, 0)
-//
-// 	for {
-// 		pos, tok, lit := scanner.Scan()
-// 		fmt.Printf("%3d %20s %q\n", pos, tok.String(), lit)
-// 		if tok == token.EOF {
-// 			return
-// 		}
-// 	}
-// }
-
 func evaluate(str string, variables map[string]interface{}, functions map[string]ExpressionFunction) (result interface{}, err error) {
 	evaluator := NewEvaluator()
 	return evaluator.Evaluate(str, variables, functions)
@@ -1301,7 +1314,24 @@ func getTestVars() map[string]interface{} {
 	}
 }
 
+// func Test_TokenExperiment(t *testing.T) {
+// 	tokenize("~2")
+// }
+// func tokenize(src string) {
+// 	var scanner scanner.Scanner
+// 	fset := token.NewFileSet()
+// 	file := fset.AddFile("", fset.Base(), len(src))
+// 	scanner.Init(file, []byte(src), nil, 0)
+//
+// 	for {
+// 		pos, tok, lit := scanner.Scan()
+// 		fmt.Printf("%3d %20s %q\n", pos, tok.String(), lit)
+// 		if tok == token.EOF {
+// 			return
+// 		}
+// 	}
+// }
+
 // TODO:
-//  bit-not
 // 	in-operator
 //  array- and string-slices

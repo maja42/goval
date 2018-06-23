@@ -38,6 +38,7 @@ package main
 %token<token> GEQ            // >=
 %token<token> SHL            // <<
 %token<token> SHR            // >>
+%token<token> BIT_NOT        // ~
 
 /* Operator precedence is taken from C/C++: http://en.cppreference.com/w/c/language/operator_precedence */
 
@@ -51,7 +52,7 @@ package main
 %left  SHL SHR
 %left  '+' '-'
 %left  '*' '/' '%'
-%right '!'
+%right '!' BIT_NOT
 %left  '.' '[' ']'
 
 %%
@@ -87,7 +88,7 @@ literal
   ;
 
 math
-  : '-' expr %prec  '*'   { $$ = unaryMinus($2)  }  /* unary minus has higher precedence */
+  : '-' expr %prec  '!'   { $$ = unaryMinus($2)  }  /* unary minus has higher precedence */
   | expr '+' expr         { $$ = add($1, $3) }
   | expr '-' expr         { $$ = sub($1, $3) }
   | expr '*' expr         { $$ = mul($1, $3) }
@@ -113,6 +114,7 @@ bitManipulation
   | expr '^' expr         { $$ = asInteger($1) ^ asInteger($3) }
   | expr SHL expr         { l := asInteger($1); r := asInteger($3); if r >= 0 { $$ = l << uint(r) } else {$$ = l >> uint(-r)} }
   | expr SHR expr         { l := asInteger($1); r := asInteger($3); if r >= 0 { $$ = l >> uint(r) } else {$$ = l << uint(-r)} }
+  | BIT_NOT expr          { $$ = ^asInteger($2) }
   ;
 
 varAccess

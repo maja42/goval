@@ -195,6 +195,13 @@ func (l *Lexer) Lex(lval *yySymType) int {
 		token.LPAREN, token.RPAREN:
 		tokenType = int(tok.String()[0])
 
+	case token.ILLEGAL:
+		if lit == "~" {
+			tokenType = BIT_NOT
+			break
+		}
+		fallthrough
+
 	default:
 		l.Perrorf(pos, "unknown token %q (%q)", tok.String(), lit)
 	}
