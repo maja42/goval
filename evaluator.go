@@ -1,32 +1,38 @@
-package main
+package goval
 
 import (
 	"runtime"
-	"go/token"
 )
+
+//go:generate goyacc.exe -o parser.go parser.go.y
 
 func init() {
 	// yyDebug = 4
 	yyErrorVerbose = true
 }
 
-type Evaluator interface {
-	Evaluate(str string, variables map[string]interface{}, functions map[string]ExpressionFunction) (interface{}, error)
-}
-
-func NewEvaluator() Evaluator {
-	return &evaluator{
+// NewEvaluator creates a new evaluator.
+func NewEvaluator() *Evaluator {
+	return &Evaluator{
 		parser: yyNewParser(),
 	}
 }
 
-type evaluator struct {
+// Evaluator is used to evaluate expression strings.
+type Evaluator struct {
 	parser yyParser
 }
 
+// ExpressionFunction can be called from within expressions.
+// The returned object needs to have one of the following types: `nil`, `bool`, `int`, `float64`, `[]interface{}` or `map[string]interface{}`.
 type ExpressionFunction func(args ...interface{}) (interface{}, error)
 
-func (e *evaluator) Evaluate(str string, variables map[string]interface{}, functions map[string]ExpressionFunction) (result interface{}, err error) {
+// Evaluate the given expression string.
+// Optionally accepts a list of variables (accessible but not modifiable from within expressions).
+// Optionally accepts a list of expression functions (can be called from within expressions).
+// Returns the resulting object or an error.
+// Stateless. Can be called concurrently. If expression functions modify variables, concurrent execution requires additional synchronization.
+func (e *Evaluator) Evaluate(str string, variables map[string]interface{}, functions map[string]ExpressionFunction) (result interface{}, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			if _, ok := r.(runtime.Error); ok {
@@ -39,10 +45,5 @@ func (e *evaluator) Evaluate(str string, variables map[string]interface{}, funct
 	lexer := NewLexer(str, variables, functions)
 
 	e.parser.Parse(lexer)
-
-	pos, tok, _ := lexer.scan()
-	if tok != token.EOF {
-		lexer.Perrorf(pos, "syntax error")
-	}
 	return lexer.result, nil
 }

@@ -123,7 +123,6 @@ Examples:
 
 # Operators
 
-
 ## Arithmetic
 
 ### Arithmetic `+` `-` `*` `/`
@@ -177,13 +176,15 @@ Examples:
 ### String concatenation `+`
 
 If either the left or right side of the `+` operator is a `string`, a string concatenation is performed.
-Supports strings, numbers and booleans.
+Supports strings, numbers, booleans and nil.
 
 Examples:
 
 ```
 "text" + 42     // "text42"
+"text" + 4.2    // "text4.2"
 42 + "text"     // "42text"
+"text" + nil    // "textnil"
 "text" + true   // "texttrue"
 ```
 
@@ -328,5 +329,68 @@ Examples:
 0x80000000 00000000 >> 63     // 0xFFFFFFFF FFFFFFFF   64bit: -1 (sign extension); 32bit: error (cannot parse number literal)
 0x80000000 >> 31              // 64bit: 0x00000000 0000001; 32bit: 0xFFFFFFFF (-1, sign extension)
 ```
+
+## More
+
+### Array contains `in`
+
+Returns true or false whether the array contains a specific element.
+
+Examples:
+
+```
+"txt" in [nil, "hello", "txt", 42]   // true
+true  in [nil, "hello", "txt", 42]   // false
+nil   in [nil, "hello", "txt", 42]   // true
+42.0  in [nil, "hello", "txt", 42]   // true
+2         in [1, [2, 3], 4]          // false
+[2, 3]    in [1, [2, 3], 4]          // true
+[2, 3, 4] in [1, [2, 3], 4]          // false
+```
+
+### Substrings `[a:b]`
+
+Slices a string and returns the given substring.
+Strings are indexed byte-wise. Multi-byte characters need to be treated carefully.
+
+The start-index indicates the first byte to be present in the substring.\
+The end-index indicates the last byte NOT to be present in the substring.\
+Hence, valid indices are in the range `[0, len(str)]`.
+
+Examples:
+
+```
+"abcdefg"[:]    // "abcdefg"
+"abcdefg"[1:]   // "bcdefg"
+"abcdefg"[:6]   // "abcdef"
+"abcdefg"[2:5]  // "cde"
+"abcdefg"[3:4]  // "d"
+
+// The characters 世 and 界 both require 3 bytes:
+"Hello, 世界"[7:13]    // "世界"
+"Hello, 世界"[7:10]    // "世"
+"Hello, 世界"[10:13]   // "界"
+```
+
+
+### Array Slicing `[a:b]`
+
+Slices an array and returns the given subarray.
+
+The start-index indicates the first element to be present in the subarray.\
+The end-index indicates the last element NOT to be present in the subarray.\
+Hence, valid indices are in the range `[0, len(arr)]`.
+
+Examples:
+
+```
+// Assuming `arr := [0, 1, 2, 3, 4, 5, 6]`:
+arr[:]    // [0, 1, 2, 3, 4, 5, 6]
+arr[1:]   // [1, 2, 3, 4, 5, 6]
+arr[:6]   // [0, 1, 2, 3, 4, 5]
+arr[2:5]  // [2, 3, 4]
+arr[3:4]  // [3]
+```
+
 
 

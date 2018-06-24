@@ -1,5 +1,5 @@
 %{
-package main
+package goval
 
 %}
 
@@ -120,10 +120,14 @@ bitManipulation
   ;
 
 varAccess
-  : IDENT                 { $$ = accessVar(yylex.(*Lexer).variables, $1.literal) }
-  | expr '.' IDENT        { $$ = accessField($1, $3.literal) }
-  | expr '[' expr ']'     { $$ = accessField($1, $3) }
-  | expr IN expr          { $$ = arrayContains($3, $1) }
+  : IDENT                        { $$ = accessVar(yylex.(*Lexer).variables, $1.literal) }
+  | expr '.' IDENT               { $$ = accessField($1, $3.literal) }
+  | expr '[' expr ']'            { $$ = accessField($1, $3) }
+  | expr IN expr                 { $$ = arrayContains($3, $1) }
+  | expr '[' expr ':' expr ']'   { $$ = slice($1, $3, $5) }
+  | expr '['      ':' expr ']'   { $$ = slice($1, nil, $4) }
+  | expr '[' expr ':'      ']'   { $$ = slice($1, $3, nil) }
+  | expr '['      ':'      ']'   { $$ = slice($1, nil, nil) }
   ;
 
 exprList

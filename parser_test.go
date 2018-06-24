@@ -1,4 +1,4 @@
-package main
+package goval
 
 import (
 	"testing"
@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"errors"
 )
-
-//go:generate goyacc.exe -o parser.go parser.go.y
 
 func Test_Literals_Simple(t *testing.T) {
 	assertEvaluation(t, nil, nil, "nil")
@@ -208,18 +206,27 @@ func Test_Bool_Not_NotApplicable(t *testing.T) {
 }
 
 func Test_String_Concat(t *testing.T) {
+	// string + string
 	assertEvaluation(t, nil, "text", `"te" + "xt"`)
 	assertEvaluation(t, nil, "00", `"0" + "0"`)
 	assertEvaluation(t, nil, "text", `"t" + "e" + "x" + "t"`)
 	assertEvaluation(t, nil, "", `"" + ""`)
 
+	// string + number
 	assertEvaluation(t, nil, "text42", `"text" + 42`)
+	assertEvaluation(t, nil, "text4.2", `"text" + 4.2`)
 	assertEvaluation(t, nil, "42text", `42 + "text"`)
+	assertEvaluation(t, nil, "4.2text", `4.2 + "text"`)
 
+	// string + bool
 	assertEvaluation(t, nil, "texttrue", `"text" + true`)
 	assertEvaluation(t, nil, "textfalse", `"text" + false`)
 	assertEvaluation(t, nil, "truetext", `true + "text"`)
 	assertEvaluation(t, nil, "falsetext", `false + "text"`)
+
+	// string + nil
+	assertEvaluation(t, nil, "textnil", `"text" + nil`)
+	assertEvaluation(t, nil, "niltext", `nil + "text"`)
 
 	assertEvaluation(t, nil, "truetext42false", `true +  "text" + 42 + false`)
 }
@@ -1013,6 +1020,11 @@ func Test_VariableAccess_DotSyntax_DoesNotExist(t *testing.T) {
 func Test_VariableAccess_DotSyntax_InvalidType(t *testing.T) {
 	vars := getTestVars()
 	assertEvalError(t, vars, "syntax error: unexpected LITERAL_NUMBER", "obj.0")
+
+	assertEvalError(t, vars, "syntax error: array index must be number, but was string", "arr.key")
+	assertEvalError(t, vars, "syntax error: cannot access fields on type string", `"txt".key`)
+	assertEvalError(t, vars, "syntax error: cannot access fields on type nil", `nil.key`)
+	assertEvalError(t, vars, "syntax error: cannot access fields on type number", `4.2.key`)
 }
 
 func Test_VariableAccess_DotSyntax_InvalidSyntax(t *testing.T) {
@@ -1074,6 +1086,10 @@ func Test_VariableAccess_ArraySyntax_InvalidType(t *testing.T) {
 	assertEvalError(t, vars, "syntax error: array index must be number, but was string", `["0"]["0"]`)
 	assertEvalError(t, vars, "syntax error: array index must be number, but was array", `arr[arr]`)
 	assertEvalError(t, vars, "syntax error: array index must be number, but was object", `arr[obj]`)
+
+	assertEvalError(t, vars, "syntax error: cannot access fields on type string", `"txt"[0]`)
+	assertEvalError(t, vars, "syntax error: cannot access fields on type nil", `nil[0]`)
+	assertEvalError(t, vars, "syntax error: cannot access fields on type number", `4.2[0]`)
 }
 
 func Test_VariableAccess_ArraySyntax_FloatHasDecimals(t *testing.T) {
@@ -1184,7 +1200,7 @@ func Test_In(t *testing.T) {
 	vars := map[string]interface{}{
 		"num":   42,
 		"empty": []interface{}{},
-		"obj": obj,
+		"obj":   obj,
 
 		"arr": arr,
 	}
@@ -1240,6 +1256,89 @@ func Test_In_InvalidTypes(t *testing.T) {
 	assertEvalError(t, nil, "syntax error: in-operator requires array, but was number", "0 in 4.2")
 	assertEvalError(t, nil, "syntax error: in-operator requires array, but was string", `0 in "text"`)
 	assertEvalError(t, nil, "syntax error: in-operator requires array, but was object", "0 in {}")
+}
+
+func Test_String_Slice(t *testing.T) {
+	assertEvaluation(t, nil, "abcdefg", `"abcdefg"[:]`)
+
+	assertEvaluation(t, nil, "abcdefg", `"abcdefg"[0:]`)
+	assertEvaluation(t, nil, "bcdefg", `"abcdefg"[1:]`)
+	assertEvaluation(t, nil, "fg", `"abcdefg"[5:]`)
+	assertEvaluation(t, nil, "g", `"abcdefg"[6:]`)
+	assertEvaluation(t, nil, "", `"abcdefg"[7:]`)
+
+	assertEvaluation(t, nil, "", `"abcdefg"[:0]`)
+	assertEvaluation(t, nil, "a", `"abcdefg"[:1]`)
+	assertEvaluation(t, nil, "abcde", `"abcdefg"[:5]`)
+	assertEvaluation(t, nil, "abcdef", `"abcdefg"[:6]`)
+	assertEvaluation(t, nil, "abcdefg", `"abcdefg"[:7]`)
+
+	assertEvaluation(t, nil, "cde", `"abcdefg"[2:5]`)
+	assertEvaluation(t, nil, "d", `"abcdefg"[3:4]`)
+}
+
+func Test_String_Slice_Unicode(t *testing.T) {
+	// The characters 世 and 界 both require 3 bytes
+	assertEvaluation(t, nil, "Hello, ", `"Hello, 世界"[:7]`)
+	assertEvaluation(t, nil, "世界", `"Hello, 世界"[7:13]`)
+	assertEvaluation(t, nil, "世", `"Hello, 世界"[7:10]`)
+	assertEvaluation(t, nil, "界", `"Hello, 世界"[10:13]`)
+}
+
+func Test_String_Slice_OutOfRange(t *testing.T) {
+	assertEvalError(t, nil, "range error: start-index -1 is negative", `"abcd"[-1:]`)
+	assertEvalError(t, nil, "range error: start-index -42 is negative", `"abcd"[-42:]`)
+
+	assertEvalError(t, nil, "range error: end-index -1 is out of range [0, 4]", `"abcd"[:-1]`)
+	assertEvalError(t, nil, "range error: end-index 5 is out of range [0, 4]", `"abcd"[:5]`)
+	assertEvalError(t, nil, "range error: end-index 42 is out of range [0, 4]", `"abcd"[:42]`)
+}
+
+func Test_Array_Slice(t *testing.T) {
+	arr := []interface{}{0, 1, 2, 3, 4, 5, 6}
+	vars := map[string]interface{}{"arr": arr}
+
+	assertEvaluation(t, vars, []interface{}{}, `[][:]`)
+	assertEvaluation(t, vars, []interface{}{1}, `[1][:]`)
+
+	assertEvaluation(t, vars, arr, `arr[:]`)
+
+	assertEvaluation(t, vars, arr[0:], `arr[0:]`)
+	assertEvaluation(t, vars, arr[1:], `arr[1:]`)
+	assertEvaluation(t, vars, arr[5:], `arr[5:]`)
+	assertEvaluation(t, vars, arr[6:], `arr[6:]`)
+	assertEvaluation(t, vars, arr[7:], `arr[7:]`)
+
+	assertEvaluation(t, vars, arr[:0], `arr[:0]`)
+	assertEvaluation(t, vars, arr[:1], `arr[:1]`)
+	assertEvaluation(t, vars, arr[:5], `arr[:5]`)
+	assertEvaluation(t, vars, arr[:6], `arr[:6]`)
+	assertEvaluation(t, vars, arr[:7], `arr[:7]`)
+
+	assertEvaluation(t, vars, arr[2:5], `arr[2:5]`)
+	assertEvaluation(t, vars, arr[3:4], `arr[3:4]`)
+}
+
+func Test_Array_Slice_OutOfRange(t *testing.T) {
+	assertEvalError(t, nil, "range error: start-index -1 is negative", `[0,1,2,3][-1:]`)
+	assertEvalError(t, nil, "range error: start-index -42 is negative", `[0,1,2,3][-42:]`)
+
+	assertEvalError(t, nil, "range error: end-index -1 is out of range [0, 4]", `[0,1,2,3][:-1]`)
+	assertEvalError(t, nil, "range error: end-index 5 is out of range [0, 4]", `[0,1,2,3][:5]`)
+	assertEvalError(t, nil, "range error: end-index 42 is out of range [0, 4]", `[0,1,2,3][:42]`)
+}
+
+func Test_Slicing_InvalidTypes(t *testing.T) {
+	vars := getTestVars()
+	allTypes := []string{"nil", "true", "false", "42", "4.2", `{"a":0}`, "{}", "obj"}
+	typeOfAllTypes := []string{"nil", "bool", "bool", "number", "number", "object", "object", "object"}
+
+	for idx, e := range allTypes {
+		typ := typeOfAllTypes[idx]
+
+		expectedErr := fmt.Sprintf("syntax error: slicing requires an array or string, but was %s", typ)
+		assertEvalError(t, vars, expectedErr, e+"[:]")
+	}
 }
 
 func Test_FunctionCall_Simple(t *testing.T) {
@@ -1330,6 +1429,7 @@ func Test_InvalidFunctionCalls(t *testing.T) {
 		},
 	}
 
+	assertEvalErrorFuncs(t, vars, functions, "syntax error: no such function \"noFunc\"", `noFunc()`)
 	assertEvalErrorFuncs(t, vars, functions, "syntax error: unexpected $end", `func(`)
 	assertEvalErrorFuncs(t, vars, functions, "syntax error: unexpected ')'", `func)`)
 	assertEvalErrorFuncs(t, vars, functions, "syntax error: unexpected ','", `func((1, 2))`)

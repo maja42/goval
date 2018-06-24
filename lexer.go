@@ -1,4 +1,4 @@
-package main
+package goval
 
 import (
 	"go/token"
@@ -11,8 +11,6 @@ import (
 )
 
 const bitSizeOfInt = int(unsafe.Sizeof(0)) * 8
-
-type Expression interface{}
 
 type Token struct {
 	literal string
@@ -214,10 +212,6 @@ func (l *Lexer) Lex(lval *yySymType) int {
 
 func (l *Lexer) Error(e string) {
 	panic(errors.New(e))
-}
-
-func (l *Lexer) Errorf(format string, a ...interface{}) {
-	panic(fmt.Errorf(format, a...))
 }
 
 func (l *Lexer) Perrorf(pos token.Pos, format string, a ...interface{}) {

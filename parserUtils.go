@@ -1,4 +1,4 @@
-package main
+package goval
 
 import (
 	"fmt"
@@ -94,6 +94,13 @@ func add(val1 interface{}, val2 interface{}) interface{} {
 	}
 	if float1OK && str2OK {
 		return strconv.FormatFloat(float1, 'f', -1, 64) + str2
+	}
+
+	if str1OK && val2 == nil {
+		return str1 + "nil"
+	}
+	if val1 == nil && str2OK {
+		return "nil" + str2
 	}
 
 	bool1, bool1OK := val1.(bool)
@@ -414,7 +421,47 @@ func accessField(s interface{}, field interface{}) interface{} {
 		return arrVar[intIdx]
 	}
 
-	return nil
+	panic(fmt.Errorf("syntax error: cannot access fields on type %s", typeOf(s)))
+}
+
+func slice(v interface{}, from, to interface{}) interface{} {
+	str, isStr := v.(string)
+	arr, isArr := v.([]interface{})
+
+	if !isStr && !isArr {
+		panic(fmt.Errorf("syntax error: slicing requires an array or string, but was %s", typeOf(v)))
+	}
+
+	var fromInt, toInt int
+	if from == nil {
+		fromInt = 0
+	} else {
+		fromInt = asInteger(from)
+	}
+
+	if to == nil && isStr{
+		toInt = len(str)
+	} else if to == nil && isArr{
+		toInt = len(arr)
+	} else {
+		toInt = asInteger(to)
+	}
+
+	if fromInt < 0 {
+		panic(fmt.Errorf("range error: start-index %d is negative", fromInt))
+	}
+
+	if isStr {
+		if toInt < 0 || toInt > len(str) {
+			panic(fmt.Errorf("range error: end-index %d is out of range [0, %d]", toInt, len(str)))
+		}
+		return str[fromInt : toInt]
+	}
+
+	if toInt < 0 || toInt > len(arr) {
+		panic(fmt.Errorf("range error: end-index %d is out of range [0, %d]", toInt, len(arr)))
+	}
+	return arr[fromInt : toInt]
 }
 
 func arrayContains(arr interface{}, val interface{}) bool {
