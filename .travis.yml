@@ -1,0 +1,11 @@
+language: go
+go:
+  - 1.8
+  - 1.9.x
+  - 1.10.x
+script:
+  - go get golang.org/x/tools/cmd/goyacc
+  - go install golang.org/x/tools/cmd/goyacc
+  - go generate
+  - go tool vet .
+  - go test -v -coverprofile=coverage.txt -covermode=atomic
