@@ -5,9 +5,7 @@ goval
 [![GoDoc](https://godoc.org/github.com/maja42/goval?status.svg)](https://godoc.org/github.com/maja42/goval)
 
 
-This library is currently under development and not ready for production.
-
-Many features are still missing and will be added in the future. 
+This library is currently under development.
 
 **What's the difference to Knetic/govaluate?**
 
