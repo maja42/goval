@@ -12,5 +12,5 @@ script:
   - go get golang.org/x/tools/cmd/cover
   - go get github.com/mattn/goveralls
   - go test -race -v -coverprofile=coverage.txt -covermode=atomic
-  after_success:
+after_success:
   - goveralls -coverprofile=coverage.txt -service=travis-ci -repotoken $COVERALLS_TOKEN
