@@ -2,8 +2,8 @@ goval
 =====
 
 [![Build Status](https://travis-ci.org/maja42/goval.svg?branch=master)](https://travis-ci.org/maja42/goval)
+[![Coverage Status](https://coveralls.io/repos/github/maja42/goval/badge.svg?branch=master)](https://coveralls.io/github/maja42/goval?branch=master)
 [![GoDoc](https://godoc.org/github.com/maja42/goval?status.svg)](https://godoc.org/github.com/maja42/goval)
-
 
 This library is currently under development.
 
