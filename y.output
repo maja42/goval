@@ -2,12 +2,12 @@
 state 0
 	$accept: .program $end 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -37,38 +37,38 @@ state 2
 	math:  expr.'*' expr 
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 
-	AND  shift 30
-	OR  shift 31
-	EQL  shift 24
-	NEQ  shift 25
-	LSS  shift 26
-	GTR  shift 27
-	LEQ  shift 28
-	GEQ  shift 29
-	SHL  shift 35
-	SHR  shift 36
-	IN  shift 39
+	_AND  shift 30
+	_OR  shift 31
+	_EQL  shift 24
+	_NEQ  shift 25
+	_LSS  shift 26
+	_GTR  shift 27
+	_LEQ  shift 28
+	_GEQ  shift 29
+	_SHL  shift 35
+	_SHR  shift 36
+	_IN  shift 39
 	'|'  shift 32
 	'^'  shift 34
 	'&'  shift 33
@@ -79,48 +79,48 @@ state 2
 	'%'  shift 23
 	'.'  shift 37
 	'['  shift 38
-	.  reduce 1 (src line 62)
+	.  reduce 1 (src line 63)
 
 
 state 3
 	expr:  literal.    (2)
 
-	.  reduce 2 (src line 70)
+	.  reduce 2 (src line 71)
 
 
 state 4
 	expr:  math.    (3)
 
-	.  reduce 3 (src line 72)
+	.  reduce 3 (src line 73)
 
 
 state 5
 	expr:  logic.    (4)
 
-	.  reduce 4 (src line 73)
+	.  reduce 4 (src line 74)
 
 
 state 6
 	expr:  bitManipulation.    (5)
 
-	.  reduce 5 (src line 74)
+	.  reduce 5 (src line 75)
 
 
 state 7
 	expr:  varAccess.    (6)
 
-	.  reduce 6 (src line 75)
+	.  reduce 6 (src line 76)
 
 
 state 8
 	expr:  '('.expr ')' 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -136,48 +136,48 @@ state 8
 	varAccess  goto 7
 
 state 9
-	expr:  IDENT.'(' ')' 
-	expr:  IDENT.'(' exprList ')' 
-	varAccess:  IDENT.    (39)
+	expr:  _IDENT.'(' ')' 
+	expr:  _IDENT.'(' exprList ')' 
+	varAccess:  _IDENT.    (39)
 
 	'('  shift 41
-	.  reduce 39 (src line 122)
+	.  reduce 39 (src line 123)
 
 
 state 10
-	literal:  LITERAL_NIL.    (10)
+	literal:  _LITERAL_NIL.    (10)
 
-	.  reduce 10 (src line 81)
+	.  reduce 10 (src line 82)
 
 
 state 11
-	literal:  LITERAL_BOOL.    (11)
+	literal:  _LITERAL_BOOL.    (11)
 
-	.  reduce 11 (src line 83)
+	.  reduce 11 (src line 84)
 
 
 state 12
-	literal:  LITERAL_NUMBER.    (12)
+	literal:  _LITERAL_NUMBER.    (12)
 
-	.  reduce 12 (src line 84)
+	.  reduce 12 (src line 85)
 
 
 state 13
-	literal:  LITERAL_STRING.    (13)
+	literal:  _LITERAL_STRING.    (13)
 
-	.  reduce 13 (src line 85)
+	.  reduce 13 (src line 86)
 
 
 state 14
 	literal:  '['.']' 
 	literal:  '['.exprList ']' 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -198,12 +198,12 @@ state 15
 	literal:  '{'.'}' 
 	literal:  '{'.exprMap '}' 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -223,12 +223,12 @@ state 15
 state 16
 	math:  '-'.expr 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -246,12 +246,12 @@ state 16
 state 17
 	logic:  '!'.expr 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -267,14 +267,14 @@ state 17
 	varAccess  goto 7
 
 state 18
-	bitManipulation:  BIT_NOT.expr 
+	bitManipulation:  _BIT_NOT.expr 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -292,12 +292,12 @@ state 18
 state 19
 	math:  expr '+'.expr 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -315,12 +315,12 @@ state 19
 state 20
 	math:  expr '-'.expr 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -338,12 +338,12 @@ state 20
 state 21
 	math:  expr '*'.expr 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -361,12 +361,12 @@ state 21
 state 22
 	math:  expr '/'.expr 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -384,12 +384,12 @@ state 22
 state 23
 	math:  expr '%'.expr 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -405,14 +405,14 @@ state 23
 	varAccess  goto 7
 
 state 24
-	logic:  expr EQL.expr 
+	logic:  expr _EQL.expr 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -428,14 +428,14 @@ state 24
 	varAccess  goto 7
 
 state 25
-	logic:  expr NEQ.expr 
+	logic:  expr _NEQ.expr 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -451,14 +451,14 @@ state 25
 	varAccess  goto 7
 
 state 26
-	logic:  expr LSS.expr 
+	logic:  expr _LSS.expr 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -474,14 +474,14 @@ state 26
 	varAccess  goto 7
 
 state 27
-	logic:  expr GTR.expr 
+	logic:  expr _GTR.expr 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -497,14 +497,14 @@ state 27
 	varAccess  goto 7
 
 state 28
-	logic:  expr LEQ.expr 
+	logic:  expr _LEQ.expr 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -520,14 +520,14 @@ state 28
 	varAccess  goto 7
 
 state 29
-	logic:  expr GEQ.expr 
+	logic:  expr _GEQ.expr 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -543,14 +543,14 @@ state 29
 	varAccess  goto 7
 
 state 30
-	logic:  expr AND.expr 
+	logic:  expr _AND.expr 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -566,14 +566,14 @@ state 30
 	varAccess  goto 7
 
 state 31
-	logic:  expr OR.expr 
+	logic:  expr _OR.expr 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -591,12 +591,12 @@ state 31
 state 32
 	bitManipulation:  expr '|'.expr 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -614,12 +614,12 @@ state 32
 state 33
 	bitManipulation:  expr '&'.expr 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -637,12 +637,12 @@ state 33
 state 34
 	bitManipulation:  expr '^'.expr 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -658,14 +658,14 @@ state 34
 	varAccess  goto 7
 
 state 35
-	bitManipulation:  expr SHL.expr 
+	bitManipulation:  expr _SHL.expr 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -681,14 +681,14 @@ state 35
 	varAccess  goto 7
 
 state 36
-	bitManipulation:  expr SHR.expr 
+	bitManipulation:  expr _SHR.expr 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -704,9 +704,9 @@ state 36
 	varAccess  goto 7
 
 state 37
-	varAccess:  expr '.'.IDENT 
+	varAccess:  expr '.'._IDENT 
 
-	IDENT  shift 69
+	_IDENT  shift 69
 	.  error
 
 
@@ -717,12 +717,12 @@ state 38
 	varAccess:  expr '['.expr ':' ']' 
 	varAccess:  expr '['.':' ']' 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -739,14 +739,14 @@ state 38
 	varAccess  goto 7
 
 state 39
-	varAccess:  expr IN.expr 
+	varAccess:  expr _IN.expr 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -768,38 +768,38 @@ state 40
 	math:  expr.'*' expr 
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 
-	AND  shift 30
-	OR  shift 31
-	EQL  shift 24
-	NEQ  shift 25
-	LSS  shift 26
-	GTR  shift 27
-	LEQ  shift 28
-	GEQ  shift 29
-	SHL  shift 35
-	SHR  shift 36
-	IN  shift 39
+	_AND  shift 30
+	_OR  shift 31
+	_EQL  shift 24
+	_NEQ  shift 25
+	_LSS  shift 26
+	_GTR  shift 27
+	_LEQ  shift 28
+	_GEQ  shift 29
+	_SHL  shift 35
+	_SHR  shift 36
+	_IN  shift 39
 	'|'  shift 32
 	'^'  shift 34
 	'&'  shift 33
@@ -815,15 +815,15 @@ state 40
 
 
 state 41
-	expr:  IDENT '('.')' 
-	expr:  IDENT '('.exprList ')' 
+	expr:  _IDENT '('.')' 
+	expr:  _IDENT '('.exprList ')' 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -843,7 +843,7 @@ state 41
 state 42
 	literal:  '[' ']'.    (14)
 
-	.  reduce 14 (src line 86)
+	.  reduce 14 (src line 87)
 
 
 state 43
@@ -861,39 +861,39 @@ state 44
 	math:  expr.'*' expr 
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 	exprList:  expr.    (47)
 
-	AND  shift 30
-	OR  shift 31
-	EQL  shift 24
-	NEQ  shift 25
-	LSS  shift 26
-	GTR  shift 27
-	LEQ  shift 28
-	GEQ  shift 29
-	SHL  shift 35
-	SHR  shift 36
-	IN  shift 39
+	_AND  shift 30
+	_OR  shift 31
+	_EQL  shift 24
+	_NEQ  shift 25
+	_LSS  shift 26
+	_GTR  shift 27
+	_LEQ  shift 28
+	_GEQ  shift 29
+	_SHL  shift 35
+	_SHR  shift 36
+	_IN  shift 39
 	'|'  shift 32
 	'^'  shift 34
 	'&'  shift 33
@@ -904,13 +904,13 @@ state 44
 	'%'  shift 23
 	'.'  shift 37
 	'['  shift 38
-	.  reduce 47 (src line 133)
+	.  reduce 47 (src line 134)
 
 
 state 45
 	literal:  '{' '}'.    (16)
 
-	.  reduce 16 (src line 88)
+	.  reduce 16 (src line 89)
 
 
 state 46
@@ -928,39 +928,39 @@ state 47
 	math:  expr.'*' expr 
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 	exprMap:  expr.':' expr 
 
-	AND  shift 30
-	OR  shift 31
-	EQL  shift 24
-	NEQ  shift 25
-	LSS  shift 26
-	GTR  shift 27
-	LEQ  shift 28
-	GEQ  shift 29
-	SHL  shift 35
-	SHR  shift 36
-	IN  shift 39
+	_AND  shift 30
+	_OR  shift 31
+	_EQL  shift 24
+	_NEQ  shift 25
+	_LSS  shift 26
+	_GTR  shift 27
+	_LEQ  shift 28
+	_GEQ  shift 29
+	_SHL  shift 35
+	_SHR  shift 36
+	_IN  shift 39
 	'|'  shift 32
 	'^'  shift 34
 	'&'  shift 33
@@ -982,31 +982,31 @@ state 48
 	math:  expr.'*' expr 
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 
-	IN  shift 39
+	_IN  shift 39
 	'.'  shift 37
 	'['  shift 38
-	.  reduce 18 (src line 92)
+	.  reduce 18 (src line 93)
 
 
 state 49
@@ -1016,31 +1016,31 @@ state 49
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
 	logic:  '!' expr.    (24)
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 
-	IN  shift 39
+	_IN  shift 39
 	'.'  shift 37
 	'['  shift 38
-	.  reduce 24 (src line 101)
+	.  reduce 24 (src line 102)
 
 
 state 50
@@ -1049,32 +1049,32 @@ state 50
 	math:  expr.'*' expr 
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	bitManipulation:  BIT_NOT expr.    (38)
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	bitManipulation:  _BIT_NOT expr.    (38)
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 
-	IN  shift 39
+	_IN  shift 39
 	'.'  shift 37
 	'['  shift 38
-	.  reduce 38 (src line 119)
+	.  reduce 38 (src line 120)
 
 
 state 51
@@ -1084,34 +1084,34 @@ state 51
 	math:  expr.'*' expr 
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 
-	IN  shift 39
+	_IN  shift 39
 	'*'  shift 21
 	'/'  shift 22
 	'%'  shift 23
 	'.'  shift 37
 	'['  shift 38
-	.  reduce 19 (src line 94)
+	.  reduce 19 (src line 95)
 
 
 state 52
@@ -1121,34 +1121,34 @@ state 52
 	math:  expr.'*' expr 
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 
-	IN  shift 39
+	_IN  shift 39
 	'*'  shift 21
 	'/'  shift 22
 	'%'  shift 23
 	'.'  shift 37
 	'['  shift 38
-	.  reduce 20 (src line 95)
+	.  reduce 20 (src line 96)
 
 
 state 53
@@ -1158,31 +1158,31 @@ state 53
 	math:  expr '*' expr.    (21)
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 
-	IN  shift 39
+	_IN  shift 39
 	'.'  shift 37
 	'['  shift 38
-	.  reduce 21 (src line 96)
+	.  reduce 21 (src line 97)
 
 
 state 54
@@ -1192,31 +1192,31 @@ state 54
 	math:  expr.'/' expr 
 	math:  expr '/' expr.    (22)
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 
-	IN  shift 39
+	_IN  shift 39
 	'.'  shift 37
 	'['  shift 38
-	.  reduce 22 (src line 97)
+	.  reduce 22 (src line 98)
 
 
 state 55
@@ -1226,31 +1226,31 @@ state 55
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
 	math:  expr '%' expr.    (23)
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 
-	IN  shift 39
+	_IN  shift 39
 	'.'  shift 37
 	'['  shift 38
-	.  reduce 23 (src line 98)
+	.  reduce 23 (src line 99)
 
 
 state 56
@@ -1259,35 +1259,35 @@ state 56
 	math:  expr.'*' expr 
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr EQL expr.    (25)
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr _EQL expr.    (25)
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 
-	LSS  shift 26
-	GTR  shift 27
-	LEQ  shift 28
-	GEQ  shift 29
-	SHL  shift 35
-	SHR  shift 36
-	IN  shift 39
+	_LSS  shift 26
+	_GTR  shift 27
+	_LEQ  shift 28
+	_GEQ  shift 29
+	_SHL  shift 35
+	_SHR  shift 36
+	_IN  shift 39
 	'+'  shift 19
 	'-'  shift 20
 	'*'  shift 21
@@ -1295,7 +1295,7 @@ state 56
 	'%'  shift 23
 	'.'  shift 37
 	'['  shift 38
-	.  reduce 25 (src line 103)
+	.  reduce 25 (src line 104)
 
 
 state 57
@@ -1304,35 +1304,35 @@ state 57
 	math:  expr.'*' expr 
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr NEQ expr.    (26)
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr _NEQ expr.    (26)
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 
-	LSS  shift 26
-	GTR  shift 27
-	LEQ  shift 28
-	GEQ  shift 29
-	SHL  shift 35
-	SHR  shift 36
-	IN  shift 39
+	_LSS  shift 26
+	_GTR  shift 27
+	_LEQ  shift 28
+	_GEQ  shift 29
+	_SHL  shift 35
+	_SHR  shift 36
+	_IN  shift 39
 	'+'  shift 19
 	'-'  shift 20
 	'*'  shift 21
@@ -1340,7 +1340,7 @@ state 57
 	'%'  shift 23
 	'.'  shift 37
 	'['  shift 38
-	.  reduce 26 (src line 104)
+	.  reduce 26 (src line 105)
 
 
 state 58
@@ -1349,31 +1349,31 @@ state 58
 	math:  expr.'*' expr 
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr LSS expr.    (27)
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr _LSS expr.    (27)
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 
-	SHL  shift 35
-	SHR  shift 36
-	IN  shift 39
+	_SHL  shift 35
+	_SHR  shift 36
+	_IN  shift 39
 	'+'  shift 19
 	'-'  shift 20
 	'*'  shift 21
@@ -1381,7 +1381,7 @@ state 58
 	'%'  shift 23
 	'.'  shift 37
 	'['  shift 38
-	.  reduce 27 (src line 105)
+	.  reduce 27 (src line 106)
 
 
 state 59
@@ -1390,31 +1390,31 @@ state 59
 	math:  expr.'*' expr 
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr GTR expr.    (28)
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr _GTR expr.    (28)
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 
-	SHL  shift 35
-	SHR  shift 36
-	IN  shift 39
+	_SHL  shift 35
+	_SHR  shift 36
+	_IN  shift 39
 	'+'  shift 19
 	'-'  shift 20
 	'*'  shift 21
@@ -1422,7 +1422,7 @@ state 59
 	'%'  shift 23
 	'.'  shift 37
 	'['  shift 38
-	.  reduce 28 (src line 106)
+	.  reduce 28 (src line 107)
 
 
 state 60
@@ -1431,31 +1431,31 @@ state 60
 	math:  expr.'*' expr 
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr LEQ expr.    (29)
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr _LEQ expr.    (29)
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 
-	SHL  shift 35
-	SHR  shift 36
-	IN  shift 39
+	_SHL  shift 35
+	_SHR  shift 36
+	_IN  shift 39
 	'+'  shift 19
 	'-'  shift 20
 	'*'  shift 21
@@ -1463,7 +1463,7 @@ state 60
 	'%'  shift 23
 	'.'  shift 37
 	'['  shift 38
-	.  reduce 29 (src line 107)
+	.  reduce 29 (src line 108)
 
 
 state 61
@@ -1472,31 +1472,31 @@ state 61
 	math:  expr.'*' expr 
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr GEQ expr.    (30)
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr _GEQ expr.    (30)
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 
-	SHL  shift 35
-	SHR  shift 36
-	IN  shift 39
+	_SHL  shift 35
+	_SHR  shift 36
+	_IN  shift 39
 	'+'  shift 19
 	'-'  shift 20
 	'*'  shift 21
@@ -1504,7 +1504,7 @@ state 61
 	'%'  shift 23
 	'.'  shift 37
 	'['  shift 38
-	.  reduce 30 (src line 108)
+	.  reduce 30 (src line 109)
 
 
 state 62
@@ -1513,37 +1513,37 @@ state 62
 	math:  expr.'*' expr 
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr AND expr.    (31)
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr _AND expr.    (31)
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 
-	EQL  shift 24
-	NEQ  shift 25
-	LSS  shift 26
-	GTR  shift 27
-	LEQ  shift 28
-	GEQ  shift 29
-	SHL  shift 35
-	SHR  shift 36
-	IN  shift 39
+	_EQL  shift 24
+	_NEQ  shift 25
+	_LSS  shift 26
+	_GTR  shift 27
+	_LEQ  shift 28
+	_GEQ  shift 29
+	_SHL  shift 35
+	_SHR  shift 36
+	_IN  shift 39
 	'|'  shift 32
 	'^'  shift 34
 	'&'  shift 33
@@ -1554,7 +1554,7 @@ state 62
 	'%'  shift 23
 	'.'  shift 37
 	'['  shift 38
-	.  reduce 31 (src line 109)
+	.  reduce 31 (src line 110)
 
 
 state 63
@@ -1563,38 +1563,38 @@ state 63
 	math:  expr.'*' expr 
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
-	logic:  expr OR expr.    (32)
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
+	logic:  expr _OR expr.    (32)
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 
-	AND  shift 30
-	EQL  shift 24
-	NEQ  shift 25
-	LSS  shift 26
-	GTR  shift 27
-	LEQ  shift 28
-	GEQ  shift 29
-	SHL  shift 35
-	SHR  shift 36
-	IN  shift 39
+	_AND  shift 30
+	_EQL  shift 24
+	_NEQ  shift 25
+	_LSS  shift 26
+	_GTR  shift 27
+	_LEQ  shift 28
+	_GEQ  shift 29
+	_SHL  shift 35
+	_SHR  shift 36
+	_IN  shift 39
 	'|'  shift 32
 	'^'  shift 34
 	'&'  shift 33
@@ -1605,7 +1605,7 @@ state 63
 	'%'  shift 23
 	'.'  shift 37
 	'['  shift 38
-	.  reduce 32 (src line 110)
+	.  reduce 32 (src line 111)
 
 
 state 64
@@ -1614,37 +1614,37 @@ state 64
 	math:  expr.'*' expr 
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr '|' expr.    (33)
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 
-	EQL  shift 24
-	NEQ  shift 25
-	LSS  shift 26
-	GTR  shift 27
-	LEQ  shift 28
-	GEQ  shift 29
-	SHL  shift 35
-	SHR  shift 36
-	IN  shift 39
+	_EQL  shift 24
+	_NEQ  shift 25
+	_LSS  shift 26
+	_GTR  shift 27
+	_LEQ  shift 28
+	_GEQ  shift 29
+	_SHL  shift 35
+	_SHR  shift 36
+	_IN  shift 39
 	'^'  shift 34
 	'&'  shift 33
 	'+'  shift 19
@@ -1654,7 +1654,7 @@ state 64
 	'%'  shift 23
 	'.'  shift 37
 	'['  shift 38
-	.  reduce 33 (src line 113)
+	.  reduce 33 (src line 114)
 
 
 state 65
@@ -1663,37 +1663,37 @@ state 65
 	math:  expr.'*' expr 
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr '&' expr.    (34)
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 
-	EQL  shift 24
-	NEQ  shift 25
-	LSS  shift 26
-	GTR  shift 27
-	LEQ  shift 28
-	GEQ  shift 29
-	SHL  shift 35
-	SHR  shift 36
-	IN  shift 39
+	_EQL  shift 24
+	_NEQ  shift 25
+	_LSS  shift 26
+	_GTR  shift 27
+	_LEQ  shift 28
+	_GEQ  shift 29
+	_SHL  shift 35
+	_SHR  shift 36
+	_IN  shift 39
 	'+'  shift 19
 	'-'  shift 20
 	'*'  shift 21
@@ -1701,7 +1701,7 @@ state 65
 	'%'  shift 23
 	'.'  shift 37
 	'['  shift 38
-	.  reduce 34 (src line 115)
+	.  reduce 34 (src line 116)
 
 
 state 66
@@ -1710,37 +1710,37 @@ state 66
 	math:  expr.'*' expr 
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
 	bitManipulation:  expr '^' expr.    (35)
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 
-	EQL  shift 24
-	NEQ  shift 25
-	LSS  shift 26
-	GTR  shift 27
-	LEQ  shift 28
-	GEQ  shift 29
-	SHL  shift 35
-	SHR  shift 36
-	IN  shift 39
+	_EQL  shift 24
+	_NEQ  shift 25
+	_LSS  shift 26
+	_GTR  shift 27
+	_LEQ  shift 28
+	_GEQ  shift 29
+	_SHL  shift 35
+	_SHR  shift 36
+	_IN  shift 39
 	'&'  shift 33
 	'+'  shift 19
 	'-'  shift 20
@@ -1749,7 +1749,7 @@ state 66
 	'%'  shift 23
 	'.'  shift 37
 	'['  shift 38
-	.  reduce 35 (src line 116)
+	.  reduce 35 (src line 117)
 
 
 state 67
@@ -1758,29 +1758,29 @@ state 67
 	math:  expr.'*' expr 
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr SHL expr.    (36)
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr _SHL expr.    (36)
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 
-	IN  shift 39
+	_IN  shift 39
 	'+'  shift 19
 	'-'  shift 20
 	'*'  shift 21
@@ -1788,7 +1788,7 @@ state 67
 	'%'  shift 23
 	'.'  shift 37
 	'['  shift 38
-	.  reduce 36 (src line 117)
+	.  reduce 36 (src line 118)
 
 
 state 68
@@ -1797,29 +1797,29 @@ state 68
 	math:  expr.'*' expr 
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	bitManipulation:  expr SHR expr.    (37)
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	bitManipulation:  expr _SHR expr.    (37)
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 
-	IN  shift 39
+	_IN  shift 39
 	'+'  shift 19
 	'-'  shift 20
 	'*'  shift 21
@@ -1827,13 +1827,13 @@ state 68
 	'%'  shift 23
 	'.'  shift 37
 	'['  shift 38
-	.  reduce 37 (src line 118)
+	.  reduce 37 (src line 119)
 
 
 state 69
-	varAccess:  expr '.' IDENT.    (40)
+	varAccess:  expr '.' _IDENT.    (40)
 
-	.  reduce 40 (src line 124)
+	.  reduce 40 (src line 125)
 
 
 state 70
@@ -1842,23 +1842,23 @@ state 70
 	math:  expr.'*' expr 
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
 	varAccess:  expr '[' expr.']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr '[' expr.':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
@@ -1866,17 +1866,17 @@ state 70
 	varAccess:  expr '[' expr.':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 
-	AND  shift 30
-	OR  shift 31
-	EQL  shift 24
-	NEQ  shift 25
-	LSS  shift 26
-	GTR  shift 27
-	LEQ  shift 28
-	GEQ  shift 29
-	SHL  shift 35
-	SHR  shift 36
-	IN  shift 39
+	_AND  shift 30
+	_OR  shift 31
+	_EQL  shift 24
+	_NEQ  shift 25
+	_LSS  shift 26
+	_GTR  shift 27
+	_LEQ  shift 28
+	_GEQ  shift 29
+	_SHL  shift 35
+	_SHR  shift 36
+	_IN  shift 39
 	'|'  shift 32
 	'^'  shift 34
 	'&'  shift 33
@@ -1896,12 +1896,12 @@ state 71
 	varAccess:  expr '[' ':'.expr ']' 
 	varAccess:  expr '[' ':'.']' 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -1923,23 +1923,23 @@ state 72
 	math:  expr.'*' expr 
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
-	varAccess:  expr IN expr.    (42)
+	varAccess:  expr._IN expr 
+	varAccess:  expr _IN expr.    (42)
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
@@ -1947,23 +1947,23 @@ state 72
 
 	'.'  shift 37
 	'['  shift 38
-	.  reduce 42 (src line 126)
+	.  reduce 42 (src line 127)
 
 
 state 73
 	expr:  '(' expr ')'.    (7)
 
-	.  reduce 7 (src line 76)
+	.  reduce 7 (src line 77)
 
 
 state 74
-	expr:  IDENT '(' ')'.    (8)
+	expr:  _IDENT '(' ')'.    (8)
 
-	.  reduce 8 (src line 77)
+	.  reduce 8 (src line 78)
 
 
 state 75
-	expr:  IDENT '(' exprList.')' 
+	expr:  _IDENT '(' exprList.')' 
 	exprList:  exprList.',' expr 
 
 	')'  shift 85
@@ -1974,18 +1974,18 @@ state 75
 state 76
 	literal:  '[' exprList ']'.    (15)
 
-	.  reduce 15 (src line 87)
+	.  reduce 15 (src line 88)
 
 
 state 77
 	exprList:  exprList ','.expr 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -2003,18 +2003,18 @@ state 77
 state 78
 	literal:  '{' exprMap '}'.    (17)
 
-	.  reduce 17 (src line 89)
+	.  reduce 17 (src line 90)
 
 
 state 79
 	exprMap:  exprMap ','.expr ':' expr 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -2032,12 +2032,12 @@ state 79
 state 80
 	exprMap:  expr ':'.expr 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -2055,19 +2055,19 @@ state 80
 state 81
 	varAccess:  expr '[' expr ']'.    (41)
 
-	.  reduce 41 (src line 125)
+	.  reduce 41 (src line 126)
 
 
 state 82
 	varAccess:  expr '[' expr ':'.expr ']' 
 	varAccess:  expr '[' expr ':'.']' 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -2089,39 +2089,39 @@ state 83
 	math:  expr.'*' expr 
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr '[' ':' expr.']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 
-	AND  shift 30
-	OR  shift 31
-	EQL  shift 24
-	NEQ  shift 25
-	LSS  shift 26
-	GTR  shift 27
-	LEQ  shift 28
-	GEQ  shift 29
-	SHL  shift 35
-	SHR  shift 36
-	IN  shift 39
+	_AND  shift 30
+	_OR  shift 31
+	_EQL  shift 24
+	_NEQ  shift 25
+	_LSS  shift 26
+	_GTR  shift 27
+	_LEQ  shift 28
+	_GEQ  shift 29
+	_SHL  shift 35
+	_SHR  shift 36
+	_IN  shift 39
 	'|'  shift 32
 	'^'  shift 34
 	'&'  shift 33
@@ -2139,13 +2139,13 @@ state 83
 state 84
 	varAccess:  expr '[' ':' ']'.    (46)
 
-	.  reduce 46 (src line 130)
+	.  reduce 46 (src line 131)
 
 
 state 85
-	expr:  IDENT '(' exprList ')'.    (9)
+	expr:  _IDENT '(' exprList ')'.    (9)
 
-	.  reduce 9 (src line 78)
+	.  reduce 9 (src line 79)
 
 
 state 86
@@ -2154,39 +2154,39 @@ state 86
 	math:  expr.'*' expr 
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 	exprList:  exprList ',' expr.    (48)
 
-	AND  shift 30
-	OR  shift 31
-	EQL  shift 24
-	NEQ  shift 25
-	LSS  shift 26
-	GTR  shift 27
-	LEQ  shift 28
-	GEQ  shift 29
-	SHL  shift 35
-	SHR  shift 36
-	IN  shift 39
+	_AND  shift 30
+	_OR  shift 31
+	_EQL  shift 24
+	_NEQ  shift 25
+	_LSS  shift 26
+	_GTR  shift 27
+	_LEQ  shift 28
+	_GEQ  shift 29
+	_SHL  shift 35
+	_SHR  shift 36
+	_IN  shift 39
 	'|'  shift 32
 	'^'  shift 34
 	'&'  shift 33
@@ -2197,7 +2197,7 @@ state 86
 	'%'  shift 23
 	'.'  shift 37
 	'['  shift 38
-	.  reduce 48 (src line 135)
+	.  reduce 48 (src line 136)
 
 
 state 87
@@ -2206,39 +2206,39 @@ state 87
 	math:  expr.'*' expr 
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 	exprMap:  exprMap ',' expr.':' expr 
 
-	AND  shift 30
-	OR  shift 31
-	EQL  shift 24
-	NEQ  shift 25
-	LSS  shift 26
-	GTR  shift 27
-	LEQ  shift 28
-	GEQ  shift 29
-	SHL  shift 35
-	SHR  shift 36
-	IN  shift 39
+	_AND  shift 30
+	_OR  shift 31
+	_EQL  shift 24
+	_NEQ  shift 25
+	_LSS  shift 26
+	_GTR  shift 27
+	_LEQ  shift 28
+	_GEQ  shift 29
+	_SHL  shift 35
+	_SHR  shift 36
+	_IN  shift 39
 	'|'  shift 32
 	'^'  shift 34
 	'&'  shift 33
@@ -2259,39 +2259,39 @@ state 88
 	math:  expr.'*' expr 
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 	exprMap:  expr ':' expr.    (49)
 
-	AND  shift 30
-	OR  shift 31
-	EQL  shift 24
-	NEQ  shift 25
-	LSS  shift 26
-	GTR  shift 27
-	LEQ  shift 28
-	GEQ  shift 29
-	SHL  shift 35
-	SHR  shift 36
-	IN  shift 39
+	_AND  shift 30
+	_OR  shift 31
+	_EQL  shift 24
+	_NEQ  shift 25
+	_LSS  shift 26
+	_GTR  shift 27
+	_LEQ  shift 28
+	_GEQ  shift 29
+	_SHL  shift 35
+	_SHR  shift 36
+	_IN  shift 39
 	'|'  shift 32
 	'^'  shift 34
 	'&'  shift 33
@@ -2302,7 +2302,7 @@ state 88
 	'%'  shift 23
 	'.'  shift 37
 	'['  shift 38
-	.  reduce 49 (src line 138)
+	.  reduce 49 (src line 139)
 
 
 state 89
@@ -2311,39 +2311,39 @@ state 89
 	math:  expr.'*' expr 
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr '[' expr ':' expr.']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 
-	AND  shift 30
-	OR  shift 31
-	EQL  shift 24
-	NEQ  shift 25
-	LSS  shift 26
-	GTR  shift 27
-	LEQ  shift 28
-	GEQ  shift 29
-	SHL  shift 35
-	SHR  shift 36
-	IN  shift 39
+	_AND  shift 30
+	_OR  shift 31
+	_EQL  shift 24
+	_NEQ  shift 25
+	_LSS  shift 26
+	_GTR  shift 27
+	_LEQ  shift 28
+	_GEQ  shift 29
+	_SHL  shift 35
+	_SHR  shift 36
+	_IN  shift 39
 	'|'  shift 32
 	'^'  shift 34
 	'&'  shift 33
@@ -2361,24 +2361,24 @@ state 89
 state 90
 	varAccess:  expr '[' expr ':' ']'.    (45)
 
-	.  reduce 45 (src line 129)
+	.  reduce 45 (src line 130)
 
 
 state 91
 	varAccess:  expr '[' ':' expr ']'.    (44)
 
-	.  reduce 44 (src line 128)
+	.  reduce 44 (src line 129)
 
 
 state 92
 	exprMap:  exprMap ',' expr ':'.expr 
 
-	LITERAL_NIL  shift 10
-	LITERAL_BOOL  shift 11
-	LITERAL_NUMBER  shift 12
-	LITERAL_STRING  shift 13
-	IDENT  shift 9
-	BIT_NOT  shift 18
+	_LITERAL_NIL  shift 10
+	_LITERAL_BOOL  shift 11
+	_LITERAL_NUMBER  shift 12
+	_LITERAL_STRING  shift 13
+	_IDENT  shift 9
+	_BIT_NOT  shift 18
 	'-'  shift 16
 	'!'  shift 17
 	'['  shift 14
@@ -2396,7 +2396,7 @@ state 92
 state 93
 	varAccess:  expr '[' expr ':' expr ']'.    (43)
 
-	.  reduce 43 (src line 127)
+	.  reduce 43 (src line 128)
 
 
 state 94
@@ -2405,39 +2405,39 @@ state 94
 	math:  expr.'*' expr 
 	math:  expr.'/' expr 
 	math:  expr.'%' expr 
-	logic:  expr.EQL expr 
-	logic:  expr.NEQ expr 
-	logic:  expr.LSS expr 
-	logic:  expr.GTR expr 
-	logic:  expr.LEQ expr 
-	logic:  expr.GEQ expr 
-	logic:  expr.AND expr 
-	logic:  expr.OR expr 
+	logic:  expr._EQL expr 
+	logic:  expr._NEQ expr 
+	logic:  expr._LSS expr 
+	logic:  expr._GTR expr 
+	logic:  expr._LEQ expr 
+	logic:  expr._GEQ expr 
+	logic:  expr._AND expr 
+	logic:  expr._OR expr 
 	bitManipulation:  expr.'|' expr 
 	bitManipulation:  expr.'&' expr 
 	bitManipulation:  expr.'^' expr 
-	bitManipulation:  expr.SHL expr 
-	bitManipulation:  expr.SHR expr 
-	varAccess:  expr.'.' IDENT 
+	bitManipulation:  expr._SHL expr 
+	bitManipulation:  expr._SHR expr 
+	varAccess:  expr.'.' _IDENT 
 	varAccess:  expr.'[' expr ']' 
-	varAccess:  expr.IN expr 
+	varAccess:  expr._IN expr 
 	varAccess:  expr.'[' expr ':' expr ']' 
 	varAccess:  expr.'[' ':' expr ']' 
 	varAccess:  expr.'[' expr ':' ']' 
 	varAccess:  expr.'[' ':' ']' 
 	exprMap:  exprMap ',' expr ':' expr.    (50)
 
-	AND  shift 30
-	OR  shift 31
-	EQL  shift 24
-	NEQ  shift 25
-	LSS  shift 26
-	GTR  shift 27
-	LEQ  shift 28
-	GEQ  shift 29
-	SHL  shift 35
-	SHR  shift 36
-	IN  shift 39
+	_AND  shift 30
+	_OR  shift 31
+	_EQL  shift 24
+	_NEQ  shift 25
+	_LSS  shift 26
+	_GTR  shift 27
+	_LEQ  shift 28
+	_GEQ  shift 29
+	_SHL  shift 35
+	_SHR  shift 36
+	_IN  shift 39
 	'|'  shift 32
 	'^'  shift 34
 	'&'  shift 33
@@ -2448,7 +2448,7 @@ state 94
 	'%'  shift 23
 	'.'  shift 37
 	'['  shift 38
-	.  reduce 50 (src line 140)
+	.  reduce 50 (src line 141)
 
 
 38 terminals, 10 nonterminals

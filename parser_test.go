@@ -141,13 +141,13 @@ func Test_Literals_Objects_InvalidKeyType(t *testing.T) {
 }
 
 func Test_MissingOperator(t *testing.T) {
-	assertEvalError(t, nil, "syntax error: unexpected LITERAL_BOOL", "true false")
+	assertEvalError(t, nil, "syntax error: unexpected _LITERAL_BOOL", "true false")
 	assertEvalError(t, nil, "syntax error: unexpected '!'", "true!")
-	assertEvalError(t, nil, "syntax error: unexpected LITERAL_NUMBER", "42 42")
-	assertEvalError(t, nil, "syntax error: unexpected LITERAL_NIL", "nil nil")
-	assertEvalError(t, nil, "syntax error: unexpected IDENT", "42 var")
-	assertEvalError(t, nil, "syntax error: unexpected IDENT", `42text`)
-	assertEvalError(t, nil, "syntax error: unexpected LITERAL_STRING", `"text" "text"`)
+	assertEvalError(t, nil, "syntax error: unexpected _LITERAL_NUMBER", "42 42")
+	assertEvalError(t, nil, "syntax error: unexpected _LITERAL_NIL", "nil nil")
+	assertEvalError(t, nil, "syntax error: unexpected _IDENT", "42 var")
+	assertEvalError(t, nil, "syntax error: unexpected _IDENT", `42text`)
+	assertEvalError(t, nil, "syntax error: unexpected _LITERAL_STRING", `"text" "text"`)
 }
 
 func Test_UnsupportedTokens(t *testing.T) {
@@ -159,7 +159,7 @@ func Test_UnsupportedTokens(t *testing.T) {
 func Test_InvalidLiterals(t *testing.T) {
 	assertEvalError(t, nil, "var error: variable \"bool\" does not exist", "bool")
 	assertEvalError(t, nil, "var error: variable \"null\" does not exist", "null")
-	assertEvalError(t, nil, "syntax error: unexpected LITERAL_NUMBER", `4.2.0`)
+	assertEvalError(t, nil, "syntax error: unexpected _LITERAL_NUMBER", `4.2.0`)
 
 	assertEvalError(t, nil, "unknown token \"CHAR\" (\"'t'\") at position 1", `'t'`)
 	assertEvalError(t, nil, "unknown token \"CHAR\" (\"'text'\") at position 1", `'text'`)
@@ -1019,7 +1019,7 @@ func Test_VariableAccess_DotSyntax_DoesNotExist(t *testing.T) {
 
 func Test_VariableAccess_DotSyntax_InvalidType(t *testing.T) {
 	vars := getTestVars()
-	assertEvalError(t, vars, "syntax error: unexpected LITERAL_NUMBER", "obj.0")
+	assertEvalError(t, vars, "syntax error: unexpected _LITERAL_NUMBER", "obj.0")
 
 	assertEvalError(t, vars, "syntax error: array index must be number, but was string", "arr.key")
 	assertEvalError(t, vars, "syntax error: cannot access fields on type string", `"txt".key`)
@@ -1029,7 +1029,7 @@ func Test_VariableAccess_DotSyntax_InvalidType(t *testing.T) {
 
 func Test_VariableAccess_DotSyntax_InvalidSyntax(t *testing.T) {
 	vars := getTestVars()
-	assertEvalError(t, vars, "syntax error: unexpected '[', expecting IDENT", "obj.[b]")
+	assertEvalError(t, vars, "syntax error: unexpected '[', expecting _IDENT", "obj.[b]")
 }
 
 func Test_VariableAccess_ArraySyntax(t *testing.T) {
