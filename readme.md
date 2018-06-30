@@ -1,6 +1,10 @@
 goval
 =====
 
+[![Build Status](https://travis-ci.org/maja42/goval.svg?branch=master)](https://travis-ci.org/maja42/goval)
+[![GoDoc](https://godoc.org/github.com/maja42/goval?status.svg)](https://godoc.org/github.com/maja42/goval)
+
+
 This library is currently under development and not ready for production.
 
 Many features are still missing and will be added in the future. 
