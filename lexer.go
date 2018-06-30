@@ -1,11 +1,11 @@
 package goval
 
 import (
-	"go/token"
-	"go/scanner"
-	"strconv"
 	"errors"
 	"fmt"
+	"go/scanner"
+	"go/token"
+	"strconv"
 	"strings"
 	"unsafe"
 )

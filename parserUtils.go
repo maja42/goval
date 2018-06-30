@@ -2,9 +2,9 @@ package goval
 
 import (
 	"fmt"
+	"math"
 	"reflect"
 	"strconv"
-	"math"
 )
 
 func typeOf(val interface{}) string {
@@ -305,8 +305,6 @@ func deepEqual(val1 interface{}, val2 interface{}) bool {
 	return val1 == val2
 }
 
-
-
 func compare(val1 interface{}, val2 interface{}, operation string) bool {
 	int1, int1OK := val1.(int)
 	int2, int2OK := val2.(int)
@@ -439,9 +437,9 @@ func slice(v interface{}, from, to interface{}) interface{} {
 		fromInt = asInteger(from)
 	}
 
-	if to == nil && isStr{
+	if to == nil && isStr {
 		toInt = len(str)
-	} else if to == nil && isArr{
+	} else if to == nil && isArr {
 		toInt = len(arr)
 	} else {
 		toInt = asInteger(to)
@@ -455,13 +453,13 @@ func slice(v interface{}, from, to interface{}) interface{} {
 		if toInt < 0 || toInt > len(str) {
 			panic(fmt.Errorf("range error: end-index %d is out of range [0, %d]", toInt, len(str)))
 		}
-		return str[fromInt : toInt]
+		return str[fromInt:toInt]
 	}
 
 	if toInt < 0 || toInt > len(arr) {
 		panic(fmt.Errorf("range error: end-index %d is out of range [0, %d]", toInt, len(arr)))
 	}
-	return arr[fromInt : toInt]
+	return arr[fromInt:toInt]
 }
 
 func arrayContains(arr interface{}, val interface{}) bool {

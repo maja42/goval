@@ -1,11 +1,11 @@
 package goval
 
 import (
-	"testing"
+	"errors"
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"strconv"
-	"fmt"
-	"errors"
+	"testing"
 )
 
 func Test_Literals_Simple(t *testing.T) {
