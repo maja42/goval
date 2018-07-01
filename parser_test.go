@@ -1292,6 +1292,8 @@ func Test_String_Slice_OutOfRange(t *testing.T) {
 	assertEvalError(t, nil, "range error: end-index -1 is out of range [0, 4]", `"abcd"[:-1]`)
 	assertEvalError(t, nil, "range error: end-index 5 is out of range [0, 4]", `"abcd"[:5]`)
 	assertEvalError(t, nil, "range error: end-index 42 is out of range [0, 4]", `"abcd"[:42]`)
+
+	assertEvalError(t, nil, "range error: start-index 2 is greater than end-index 1", `"abcd"[2:1]`)
 }
 
 func Test_Array_Slice(t *testing.T) {
@@ -1326,6 +1328,8 @@ func Test_Array_Slice_OutOfRange(t *testing.T) {
 	assertEvalError(t, nil, "range error: end-index -1 is out of range [0, 4]", `[0,1,2,3][:-1]`)
 	assertEvalError(t, nil, "range error: end-index 5 is out of range [0, 4]", `[0,1,2,3][:5]`)
 	assertEvalError(t, nil, "range error: end-index 42 is out of range [0, 4]", `[0,1,2,3][:42]`)
+
+	assertEvalError(t, nil, "range error: start-index 2 is greater than end-index 1", `[0,1,2,3][2:1]`)
 }
 
 func Test_Slicing_InvalidTypes(t *testing.T) {

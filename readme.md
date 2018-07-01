@@ -5,29 +5,89 @@ goval
 [![Coverage Status](https://coveralls.io/repos/github/maja42/goval/badge.svg?branch=master)](https://coveralls.io/github/maja42/goval?branch=master)
 [![GoDoc](https://godoc.org/github.com/maja42/goval?status.svg)](https://godoc.org/github.com/maja42/goval)
 
-This library is currently under development.
 
-**What's the difference to Knetic/govaluate?**
+This library allows programs to evaluate arbitrary arithmetic/string/logic expressions.
+Custom extensions like variable access and function calls are supported.
+
+Please use the issue-tracker for any questions, feedback, bug-reports and feature-requests. 
+
+This project is licensed under the terms of the MIT license.
+
+# Demo
+
+A small demo that evaluates expressions given from stdin can be found in the example folder:
+
+```
+go get -u github.com/maja42/goval
+cd $GOPATH/src/github.com/maja42/goval/
+go run example/main.go
+```
+
+# Usage
+
+Minimal example:
+
+```go
+eval := goval.NewEvaluator()
+result, err := eval.Evaluate(`42 > 21`, nil, nil) // Returns <true, nil>
+```
+
+Accessing variables:
+```go
+eval := goval.NewEvaluator()
+variables := map[string]interface{}{
+    "os": runtime.GOOS,
+    "arch": runtime.GOARCH,
+}
+result, err := eval.Evaluate(`os + "/" + arch`, variables, nil) // Returns <"linux/amd64", nil>
+```
+
+Calling functions:
+```go
+eval := goval.NewEvaluator()
+variables := map[string]interface{}{
+    "os":   runtime.GOOS,
+    "arch": runtime.GOARCH,
+}
+
+functions := make(map[string]goval.ExpressionFunction)
+functions["strlen"] = func(args ...interface{}) (interface{}, error) {
+    str := args[0].(string)
+    return len(str), nil
+}
+
+result, err := eval.Evaluate(`strlen(arch[:2]) + strlen("text")`, variables, functions) // Returns <6, nil>
+```
+
+
+# Alternative Libraries
 
 If you are looking for a generic evaluation library, 
 you probably know about [Knetic/govaluate](https://github.com/Knetic/govaluate).
 
-However, this library has several shortcomings and limitations, which cannot be worked around. 
-That's how this library was born. The main differences are:
+I also used that library in my own projects at first, but I quickly noticed a few shortcomings and limitations, 
+which led be to create my own library. The main differences are:
 
-- Full support for arrays and objects
+- Full support for arrays and objects.
 - Accessing variables (maps) via `.` and `[]` syntax
-- Differentiation between `int` and `float64`
-- Support for array- and object concatenation
+- Support for array- and object concatenation.
 - Array literals with `[]` as well as object literals with `{}`
-- Type-aware bit-operations (they only work with `int`)
-- No special handling of strings that look like dates
-- Useful error messages
-- High performance and high extensibility due to the use of go/scanner and yacc
-- High test coverage
+- Differentiation between `int` and `float64`.
+- Type-aware bit-operations (they only work with `int`).
+- Hex-Literals (useful as soon as bit-operations are needed).
+- No support for dates (strings are just strings, they don't have a special meaning, even if they look like dates).\
+  Support for dates and other types like structs *could* be added if needed.
+- Useful error messages.
+- Written with go/scanner and goyacc. \
+    This vastly reduces code size (and therefore vulnerabilities to bugs),
+    creates super-fast code and allows new features to be added in minutes, rather than days.
+- High test coverage (including special cases like 32 and 64bit architectural differences)
 
+For a full list of features, please refer to the documentation below.
 
-# Types
+# Documentation
+
+## Types
 
 This library fully supports the following types: `nil`, `bool`, `int`, `float64`, `string`, `[]interface{}` (=arrays) and `map[string]interface{}` (=objects). 
 
@@ -35,7 +95,7 @@ If necessary, numerical values will be automatically converted between `int` and
 
 Arrays and Objects are untyped. They can store any other value ("mixed arrays").
 
-# Variables
+## Variables
 
 It is possible directly access custom-defined variables.
 Variables are read-only and cannot be modified from within expressions.
@@ -52,7 +112,7 @@ var[anotherVar]
 var["fie" + "ld"].field[42 - var2][0]
 ```
 
-# Functions
+## Functions
 
 It is possible to call custom-defined functions from within expressions.
 
@@ -65,7 +125,7 @@ min(4, 3, 12, max(1, 3, 3))
 len("te" + "xt")
 ```
 
-# Literals
+## Literals
 
 Any literal can be defined within expressions. 
 String literals can be put in double-quotes `"` or back-ticks \`.
@@ -110,7 +170,7 @@ Examples:
 {"a": {"b": 42}}["a"]["b"]  // 42
 ```
 
-# Precedence
+## Precedence
 
 Operator precedence strictly follows [C/C++ rules](http://en.cppreference.com/w/cpp/language/operator_precedence).
 
@@ -123,11 +183,11 @@ Examples:
 (1 + 2) * 3  // 9
 ```
 
-# Operators
+## Operators
 
-## Arithmetic
+### Arithmetic
 
-### Arithmetic `+` `-` `*` `/`
+#### Arithmetic `+` `-` `*` `/`
 
 If both sides are integers, the resulting value is also an integer.
 Otherwise, the result will be a floating point number.
@@ -143,7 +203,7 @@ Examples:
 24.0 / 10           // 2.4
 ```
 
-### Modulo `%`
+#### Modulo `%`
 
 If both sides are integers, the resulting value is also an integer.
 Otherwise, the result will be a floating point number.
@@ -157,7 +217,7 @@ Examples:
 10 % 3.5    // 3.0
 ```
 
-### Negation `-` (unary minus)
+#### Negation `-` (unary minus)
 
 Negates the number on the right.
 
@@ -173,9 +233,9 @@ Examples:
 ```
 
 
-## Concatenation
+### Concatenation
 
-### String concatenation `+`
+#### String concatenation `+`
 
 If either the left or right side of the `+` operator is a `string`, a string concatenation is performed.
 Supports strings, numbers, booleans and nil.
@@ -190,7 +250,7 @@ Examples:
 "text" + true   // "texttrue"
 ```
 
-### Array concatenation `+`
+#### Array concatenation `+`
 
 If both sides of the `+` operator are arrays, they are concatenated
 
@@ -201,7 +261,7 @@ Examples:
 [0] + [1] + [[2]] + []   // [0, 1, [2]]
 ```
 
-### Object concatenation `+`
+#### Object concatenation `+`
 
 If both sides of the `+` operator are objects, their fields are combined into a new object.
 If both objects contain the same keys, the value of the right object will override those of the left.
@@ -214,15 +274,15 @@ Examples:
 {"b": 3, "c": 4} + {"a": 1, "b": 2}    // {"a": 1, "b": 2, "c": 4}
 ```
 
-## Logic
+### Logic
 
-### Equals `==`, NotEquals `!=`
+#### Equals `==`, NotEquals `!=`
 
 Performs a deep-compare between the two operands.
 When comparing `int` and `float64`, 
 the integer will be casted to a floating point number.
 
-### Comparisons `<`, `>`, `<=`, `>=`
+#### Comparisons `<`, `>`, `<=`, `>=`
 
 Compares two numbers. If one side of the operator is an integer and the other is a floating point number,
 the integer number will be casted. This might lead to unexpected results for very big numbers which are rounded
@@ -237,7 +297,7 @@ Examples:
 3.5 >= 3.5   // true
 ```
 
-### And `&&`, Or `||`
+#### And `&&`, Or `||`
 
 Examples:
 
@@ -249,7 +309,7 @@ false && false || true   // true
 ```
 
 
-### Not `!`
+#### Not `!`
 
 Inverts the boolean on the right.
 
@@ -262,9 +322,9 @@ Examples:
 !varName
 ```
 
-## Bit Manipulation
+### Bit Manipulation
 
-### Logical Or `|`, Logical And `&`, Logical XOr `^`
+#### Logical Or `|`, Logical And `&`, Logical XOr `^`
 
 If one side of the operator is a floating point number, the number is casted to an integer if possible. 
 If decimal places would be lost during that process, it is considered a type error.
@@ -285,7 +345,7 @@ Examples:
 10 ^ 15 ^ 1    // 4
 ```
 
-### Bitwise Not `~`
+#### Bitwise Not `~`
 
 If performed on a floating point number, the number is casted to an integer if possible. 
 If decimal places would be lost during that process, it is considered a type error.
@@ -304,7 +364,7 @@ Examples:
 ~0xFFFFFFFF FFFFFFFF  // 64bit appl.: 0x00; 32bit: error
 ```
 
-### Bit-Shift `<<`, `>>`
+#### Bit-Shift `<<`, `>>`
 
 If one side of the operator is a floating point number, the number is casted to an integer if possible. 
 If decimal places would be lost during that process, it is considered a type error.
@@ -332,9 +392,9 @@ Examples:
 0x80000000 >> 31              // 64bit: 0x00000000 0000001; 32bit: 0xFFFFFFFF (-1, sign extension)
 ```
 
-## More
+### More
 
-### Array contains `in`
+#### Array contains `in`
 
 Returns true or false whether the array contains a specific element.
 
@@ -350,7 +410,7 @@ nil   in [nil, "hello", "txt", 42]   // true
 [2, 3, 4] in [1, [2, 3], 4]          // false
 ```
 
-### Substrings `[a:b]`
+#### Substrings `[a:b]`
 
 Slices a string and returns the given substring.
 Strings are indexed byte-wise. Multi-byte characters need to be treated carefully.
@@ -375,7 +435,7 @@ Examples:
 ```
 
 
-### Array Slicing `[a:b]`
+#### Array Slicing `[a:b]`
 
 Slices an array and returns the given subarray.
 
