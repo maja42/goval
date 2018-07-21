@@ -1,4 +1,4 @@
-package goval
+package internal
 
 import (
 	"errors"
@@ -10,25 +10,25 @@ import (
 	"unsafe"
 )
 
-const bitSizeOfInt = int(unsafe.Sizeof(0)) * 8
+const BitSizeOfInt = int(unsafe.Sizeof(0)) * 8
 
-type tokenInf struct {
+type Token struct {
 	literal string
 	value   interface{}
 }
 
-type lexer struct {
+type Lexer struct {
 	scanner scanner.Scanner
 	result  interface{}
 
 	nextTokenType int
-	nextTokenInfo tokenInf
+	nextTokenInfo Token
 
 	variables map[string]interface{}
 	functions map[string]ExpressionFunction
 }
 
-func newLexer(src string, variables map[string]interface{}, functions map[string]ExpressionFunction) *lexer {
+func NewLexer(src string, variables map[string]interface{}, functions map[string]ExpressionFunction) *Lexer {
 	if variables == nil {
 		variables = map[string]interface{}{}
 	}
@@ -36,7 +36,7 @@ func newLexer(src string, variables map[string]interface{}, functions map[string
 		functions = map[string]ExpressionFunction{}
 	}
 
-	lexer := &lexer{
+	lexer := &Lexer{
 		variables: variables,
 		functions: functions,
 	}
@@ -48,7 +48,7 @@ func newLexer(src string, variables map[string]interface{}, functions map[string
 	return lexer
 }
 
-func (l *lexer) scan() (token.Pos, token.Token, string) {
+func (l *Lexer) scan() (token.Pos, token.Token, string) {
 	for {
 		pos, tok, lit := l.scanner.Scan()
 		if tok == token.SEMICOLON && lit == "\n" {
@@ -62,7 +62,7 @@ func (l *lexer) scan() (token.Pos, token.Token, string) {
 		return pos, tok, lit
 	}
 }
-func (l *lexer) Lex(lval *yySymType) int {
+func (l *Lexer) Lex(lval *yySymType) int {
 	var tokenType int
 	var err error
 
@@ -76,7 +76,7 @@ func (l *lexer) Lex(lval *yySymType) int {
 
 	pos, tok, lit := l.scan()
 
-	tokenInfo := tokenInf{
+	tokenInfo := Token{
 		value:   nil,
 		literal: lit,
 	}
@@ -89,11 +89,11 @@ func (l *lexer) Lex(lval *yySymType) int {
 		// Literals
 
 	case token.INT:
-		tokenType = _LITERAL_NUMBER
+		tokenType = LITERAL_NUMBER
 		hex := strings.TrimPrefix(lit, "0x")
 		if len(hex) < len(lit) {
 			var hexVal uint64
-			hexVal, err = strconv.ParseUint(hex, 16, bitSizeOfInt)
+			hexVal, err = strconv.ParseUint(hex, 16, BitSizeOfInt)
 			tokenInfo.value = int(hexVal)
 		} else {
 			tokenInfo.value, err = strconv.Atoi(lit)
@@ -102,14 +102,14 @@ func (l *lexer) Lex(lval *yySymType) int {
 			l.Perrorf(pos, "parse error: cannot parse integer")
 		}
 	case token.FLOAT:
-		tokenType = _LITERAL_NUMBER
+		tokenType = LITERAL_NUMBER
 		tokenInfo.value, err = strconv.ParseFloat(lit, 64)
 		if err != nil {
 			l.Perrorf(pos, "parse error: cannot parse float")
 		}
 
 	case token.STRING:
-		tokenType = _LITERAL_STRING
+		tokenType = LITERAL_STRING
 		tokenInfo.value, err = strconv.Unquote(lit)
 		if err != nil {
 			l.Perrorf(pos, "parse error: cannot unquote string literal")
@@ -126,32 +126,32 @@ func (l *lexer) Lex(lval *yySymType) int {
 		tokenType = int(tok.String()[0])
 
 	case token.LAND:
-		tokenType = _AND
+		tokenType = AND
 	case token.LOR:
-		tokenType = _OR
+		tokenType = OR
 
 	case token.EQL:
-		tokenType = _EQL
+		tokenType = EQL
 	case token.NEQ:
-		tokenType = _NEQ
+		tokenType = NEQ
 
 	case token.LSS:
-		tokenType = _LSS
+		tokenType = LSS
 	case token.GTR:
-		tokenType = _GTR
+		tokenType = GTR
 	case token.LEQ:
-		tokenType = _LEQ
+		tokenType = LEQ
 	case token.GEQ:
-		tokenType = _GEQ
+		tokenType = GEQ
 
 	case token.ARROW:
 		// This token is known by go, but not within our expressions.
 		// Instead, we treat it as two tokens (less and unary-minus).
-		tokenType = _LSS
+		tokenType = LSS
 		tokenInfo.literal = "<"
 		// Remember the minus-operator and omit it the next time:
 		l.nextTokenType = int('-')
-		l.nextTokenInfo = tokenInf{
+		l.nextTokenInfo = Token{
 			value:   nil,
 			literal: "-",
 		}
@@ -162,23 +162,23 @@ func (l *lexer) Lex(lval *yySymType) int {
 		tokenType = int(tok.String()[0])
 
 	case token.SHL:
-		tokenType = _SHL
+		tokenType = SHL
 	case token.SHR:
-		tokenType = _SHR
+		tokenType = SHR
 
 	case token.IDENT:
 		if lit == "nil" {
-			tokenType = _LITERAL_NIL
+			tokenType = LITERAL_NIL
 		} else if lit == "true" {
-			tokenType = _LITERAL_BOOL
+			tokenType = LITERAL_BOOL
 			tokenInfo.value = true
 		} else if lit == "false" {
-			tokenType = _LITERAL_BOOL
+			tokenType = LITERAL_BOOL
 			tokenInfo.value = false
 		} else if lit == "in" || lit == "IN" {
-			tokenType = _IN
+			tokenType = IN
 		} else {
-			tokenType = _IDENT
+			tokenType = IDENT
 		}
 
 	case token.PERIOD:
@@ -197,7 +197,7 @@ func (l *lexer) Lex(lval *yySymType) int {
 
 	case token.ILLEGAL:
 		if lit == "~" {
-			tokenType = _BIT_NOT
+			tokenType = BIT_NOT
 			break
 		}
 		fallthrough
@@ -210,13 +210,17 @@ func (l *lexer) Lex(lval *yySymType) int {
 	return tokenType
 }
 
-func (l *lexer) Error(e string) {
+func (l *Lexer) Error(e string) {
 	panic(errors.New(e))
 }
 
-func (l *lexer) Perrorf(pos token.Pos, format string, a ...interface{}) {
+func (l *Lexer) Perrorf(pos token.Pos, format string, a ...interface{}) {
 	if pos.IsValid() {
 		format = format + " at position " + strconv.Itoa(int(pos))
 	}
 	panic(fmt.Errorf(format, a...))
+}
+
+func (l *Lexer) Result() interface{} {
+	return l.result
 }

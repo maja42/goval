@@ -1,4 +1,4 @@
-package goval
+package internal
 
 import (
 	"fmt"
@@ -6,6 +6,15 @@ import (
 	"reflect"
 	"strconv"
 )
+
+func init() {
+	yyDebug = 0           // can be increased for debugging the generated parser
+	yyErrorVerbose = true // make sure to get better errors than just "syntax error"
+}
+
+// ExpressionFunction can be called from within expressions.
+// The returned object needs to have one of the following types: `nil`, `bool`, `int`, `float64`, `[]interface{}` or `map[string]interface{}`.
+type ExpressionFunction = func(args ...interface{}) (interface{}, error)
 
 func typeOf(val interface{}) string {
 	if val == nil {

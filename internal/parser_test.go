@@ -1,4 +1,4 @@
-package goval
+package internal
 
 import (
 	"errors"
@@ -43,40 +43,40 @@ func Test_Literals_Hex(t *testing.T) {
 	assertEvaluation(t, nil, 23205, "0x5AA5")
 	assertEvaluation(t, nil, 65535, "0xFFFF") // 16bit
 
-	result, err := evaluate("0x7FFFFFFF", nil, nil) // 32bit, leading zero
+	result, err := Evaluate("0x7FFFFFFF", nil, nil) // 32bit, leading zero
 	if assert.NoError(t, err) {
 		assert.Equal(t, int64(2147483647), int64(result.(int)))
 	}
 
-	if bitSizeOfInt == 32 {
-		result, err = evaluate("0x80000000", nil, nil) // 32bit, leading one (highest negative)
+	if BitSizeOfInt == 32 {
+		result, err = Evaluate("0x80000000", nil, nil) // 32bit, leading one (highest negative)
 		if assert.NoError(t, err) {
 			assert.Equal(t, int32(-2147483648), int32(result.(int)))
 		}
 
-		result, err = evaluate("0xFFFFFFFF", nil, nil) // 32bit, leading one (lowest negative)
+		result, err = Evaluate("0xFFFFFFFF", nil, nil) // 32bit, leading one (lowest negative)
 		if assert.NoError(t, err) {
 			assert.Equal(t, int32(-1), int32(result.(int)))
 		}
 	}
 
-	if bitSizeOfInt >= 64 {
-		result, err = evaluate("0xFFFFFFFF", nil, nil) // 32bit
+	if BitSizeOfInt >= 64 {
+		result, err = Evaluate("0xFFFFFFFF", nil, nil) // 32bit
 		if assert.NoError(t, err) {
 			assert.Equal(t, int64(4294967295), int64(result.(int)))
 		}
 
-		result, err = evaluate("0x7FFFFFFFFFFFFFFF", nil, nil) // 64bit, leading zero (highest positive)
+		result, err = Evaluate("0x7FFFFFFFFFFFFFFF", nil, nil) // 64bit, leading zero (highest positive)
 		if assert.NoError(t, err) {
 			assert.Equal(t, int64(9223372036854775807), int64(result.(int)))
 		}
 
-		result, err = evaluate("0x8000000000000000", nil, nil) // 64bit, leading one (highest negative)
+		result, err = Evaluate("0x8000000000000000", nil, nil) // 64bit, leading one (highest negative)
 		if assert.NoError(t, err) {
 			assert.Equal(t, int64(-9223372036854775808), int64(result.(int)))
 		}
 
-		result, err = evaluate("0xFFFFFFFFFFFFFFFF", nil, nil) // 64bit, leading one (lowest negative)
+		result, err = Evaluate("0xFFFFFFFFFFFFFFFF", nil, nil) // 64bit, leading one (lowest negative)
 		if assert.NoError(t, err) {
 			assert.Equal(t, int64(-1), int64(result.(int)))
 		}
@@ -120,7 +120,7 @@ func Test_Literals_Objects_DynamicKeys(t *testing.T) {
 }
 
 func Test_LiteralsOutOfRange(t *testing.T) {
-	if bitSizeOfInt == 32 {
+	if BitSizeOfInt == 32 {
 		assertEvalError(t, nil, "parse error: cannot parse integer at position 1", "0x100000000") // 33bit
 	} else {
 		assertEvalError(t, nil, "parse error: cannot parse integer at position 1", "0x10000000000000000") // 65bit
@@ -141,13 +141,13 @@ func Test_Literals_Objects_InvalidKeyType(t *testing.T) {
 }
 
 func Test_MissingOperator(t *testing.T) {
-	assertEvalError(t, nil, "syntax error: unexpected _LITERAL_BOOL", "true false")
+	assertEvalError(t, nil, "syntax error: unexpected LITERAL_BOOL", "true false")
 	assertEvalError(t, nil, "syntax error: unexpected '!'", "true!")
-	assertEvalError(t, nil, "syntax error: unexpected _LITERAL_NUMBER", "42 42")
-	assertEvalError(t, nil, "syntax error: unexpected _LITERAL_NIL", "nil nil")
-	assertEvalError(t, nil, "syntax error: unexpected _IDENT", "42 var")
-	assertEvalError(t, nil, "syntax error: unexpected _IDENT", `42text`)
-	assertEvalError(t, nil, "syntax error: unexpected _LITERAL_STRING", `"text" "text"`)
+	assertEvalError(t, nil, "syntax error: unexpected LITERAL_NUMBER", "42 42")
+	assertEvalError(t, nil, "syntax error: unexpected LITERAL_NIL", "nil nil")
+	assertEvalError(t, nil, "syntax error: unexpected IDENT", "42 var")
+	assertEvalError(t, nil, "syntax error: unexpected IDENT", `42text`)
+	assertEvalError(t, nil, "syntax error: unexpected LITERAL_STRING", `"text" "text"`)
 }
 
 func Test_UnsupportedTokens(t *testing.T) {
@@ -159,7 +159,7 @@ func Test_UnsupportedTokens(t *testing.T) {
 func Test_InvalidLiterals(t *testing.T) {
 	assertEvalError(t, nil, "var error: variable \"bool\" does not exist", "bool")
 	assertEvalError(t, nil, "var error: variable \"null\" does not exist", "null")
-	assertEvalError(t, nil, "syntax error: unexpected _LITERAL_NUMBER", `4.2.0`)
+	assertEvalError(t, nil, "syntax error: unexpected LITERAL_NUMBER", `4.2.0`)
 
 	assertEvalError(t, nil, "unknown token \"CHAR\" (\"'t'\") at position 1", `'t'`)
 	assertEvalError(t, nil, "unknown token \"CHAR\" (\"'text'\") at position 1", `'text'`)
@@ -537,7 +537,7 @@ func Test_AndOr_InvalidTypes(t *testing.T) {
 			expectedErr = fmt.Sprintf("type error: required bool, but was %s", nonBoolType)
 			assertEvalError(t, vars, expectedErr, t1+"||"+t2)
 
-			result, err := evaluate(t1+"||"+t2, vars, nil)
+			result, err := Evaluate(t1+"||"+t2, vars, nil)
 			assert.Errorf(t, err, "%v || %v\n", t1, t2)
 			assert.Nil(t, result)
 		}
@@ -819,10 +819,10 @@ func Test_BitManipulation_Not(t *testing.T) {
 	assertEvaluation(t, nil, 0x5AA5, "(~0xA55A) & 0xFFFF")
 	assertEvaluation(t, nil, 0xA55A, "(~0x5AA5) & 0xFFFF")
 
-	if bitSizeOfInt == 32 {
+	if BitSizeOfInt == 32 {
 		assertEvaluation(t, nil, -1, "~0")
 		assertEvaluation(t, nil, 0, "~0xFFFFFFFF")
-	} else if bitSizeOfInt == 64 {
+	} else if BitSizeOfInt == 64 {
 		assertEvaluation(t, nil, -1, "~0")
 		assertEvaluation(t, nil, 0, "~0xFFFFFFFFFFFFFFFF")
 	}
@@ -844,15 +844,15 @@ func Test_BitManipulation_Shift(t *testing.T) {
 	assertEvaluation(t, nil, 4, "0x01 << 2")
 	assertEvaluation(t, nil, 24, "0x03 << 3")
 
-	if bitSizeOfInt == 32 {
+	if BitSizeOfInt == 32 {
 		assertEvaluation(t, nil, -2147483648, "0x01 << 31") // 32bit, leading one (highest negative)
 		assertEvaluation(t, nil, 0, "0x01 << 32")           // 32bit, truncated
-	} else if bitSizeOfInt == 64 {
+	} else if BitSizeOfInt == 64 {
 		assertEvaluation(t, nil, -9223372036854775808, "0x01 << 63") // 64bit, leading one (highest negative)
 		assertEvaluation(t, nil, 0, "0x01 << 64")                    // 64bit, truncated
 	}
 
-	if bitSizeOfInt == 32 {
+	if BitSizeOfInt == 32 {
 		assertEvaluation(t, nil, 1, "0x40000000 >> 30")
 		assertEvaluation(t, nil, 2, "0x40000000 >> 28")
 		assertEvaluation(t, nil, 4, "0x40000000 >> 28")
@@ -860,7 +860,7 @@ func Test_BitManipulation_Shift(t *testing.T) {
 
 		assertEvaluation(t, nil, 0, "0x40000000 >> 31")  // underflow
 		assertEvaluation(t, nil, -1, "0x80000000 >> 31") // sign extension
-	} else if bitSizeOfInt == 64 {
+	} else if BitSizeOfInt == 64 {
 		assertEvaluation(t, nil, 1, "0x4000000000000000 >> 62")
 		assertEvaluation(t, nil, 2, "0x4000000000000000 >> 61")
 		assertEvaluation(t, nil, 4, "0x4000000000000000 >> 60")
@@ -878,15 +878,15 @@ func Test_BitManipulation_NegativeShift(t *testing.T) {
 	assertEvaluation(t, nil, 4, "0x01 >> -2")
 	assertEvaluation(t, nil, 24, "0x03 >> -3")
 
-	if bitSizeOfInt == 32 {
+	if BitSizeOfInt == 32 {
 		assertEvaluation(t, nil, -2147483648, "0x01 >> -31") // 32bit, leading one (highest negative)
 		assertEvaluation(t, nil, 0, "0x01 >> -32")           // 32bit, truncated
-	} else if bitSizeOfInt == 64 {
+	} else if BitSizeOfInt == 64 {
 		assertEvaluation(t, nil, -9223372036854775808, "0x01 >> -63") // 64bit, leading one (highest negative)
 		assertEvaluation(t, nil, 0, "0x01 >> -64")                    // 64bit, truncated
 	}
 
-	if bitSizeOfInt == 32 {
+	if BitSizeOfInt == 32 {
 		assertEvaluation(t, nil, 1, "0x40000000 << -30")
 		assertEvaluation(t, nil, 2, "0x40000000 << -28")
 		assertEvaluation(t, nil, 4, "0x40000000 << -28")
@@ -894,7 +894,7 @@ func Test_BitManipulation_NegativeShift(t *testing.T) {
 
 		assertEvaluation(t, nil, 0, "0x40000000 << -31")  // underflow
 		assertEvaluation(t, nil, -1, "0x80000000 << -31") // sign extension
-	} else if bitSizeOfInt == 64 {
+	} else if BitSizeOfInt == 64 {
 		assertEvaluation(t, nil, 1, "0x4000000000000000 << -62")
 		assertEvaluation(t, nil, 2, "0x4000000000000000 << -61")
 		assertEvaluation(t, nil, 4, "0x4000000000000000 << -60")
@@ -1019,7 +1019,7 @@ func Test_VariableAccess_DotSyntax_DoesNotExist(t *testing.T) {
 
 func Test_VariableAccess_DotSyntax_InvalidType(t *testing.T) {
 	vars := getTestVars()
-	assertEvalError(t, vars, "syntax error: unexpected _LITERAL_NUMBER", "obj.0")
+	assertEvalError(t, vars, "syntax error: unexpected LITERAL_NUMBER", "obj.0")
 
 	assertEvalError(t, vars, "syntax error: array index must be number, but was string", "arr.key")
 	assertEvalError(t, vars, "syntax error: cannot access fields on type string", `"txt".key`)
@@ -1029,7 +1029,7 @@ func Test_VariableAccess_DotSyntax_InvalidType(t *testing.T) {
 
 func Test_VariableAccess_DotSyntax_InvalidSyntax(t *testing.T) {
 	vars := getTestVars()
-	assertEvalError(t, vars, "syntax error: unexpected '[', expecting _IDENT", "obj.[b]")
+	assertEvalError(t, vars, "syntax error: unexpected '[', expecting IDENT", "obj.[b]")
 }
 
 func Test_VariableAccess_ArraySyntax(t *testing.T) {
@@ -1439,20 +1439,15 @@ func Test_InvalidFunctionCalls(t *testing.T) {
 	assertEvalErrorFuncs(t, vars, functions, "syntax error: unexpected ','", `func((1, 2))`)
 }
 
-func evaluate(str string, variables map[string]interface{}, functions map[string]ExpressionFunction) (result interface{}, err error) {
-	evaluator := NewEvaluator()
-	return evaluator.Evaluate(str, variables, functions)
-}
-
 func assertEvaluation(t *testing.T, variables map[string]interface{}, expected interface{}, str string) {
-	result, err := evaluate(str, variables, nil)
+	result, err := Evaluate(str, variables, nil)
 	if assert.NoError(t, err) {
 		assert.Equal(t, expected, result)
 	}
 }
 
 func assertEvaluationFuncs(t *testing.T, variables map[string]interface{}, functions map[string]ExpressionFunction, expected interface{}, str string) {
-	result, err := evaluate(str, variables, functions)
+	result, err := Evaluate(str, variables, functions)
 	if assert.NoError(t, err) {
 		assert.Equal(t, expected, result)
 	}
@@ -1463,7 +1458,7 @@ func assertEvalError(t *testing.T, variables map[string]interface{}, expectedErr
 }
 
 func assertEvalErrorFuncs(t *testing.T, variables map[string]interface{}, functions map[string]ExpressionFunction, expectedErr string, str string) {
-	result, err := evaluate(str, variables, functions)
+	result, err := Evaluate(str, variables, functions)
 	if assert.Error(t, err) {
 		assert.Equal(t, expectedErr, err.Error())
 	}
@@ -1505,6 +1500,3 @@ func getTestVars() map[string]interface{} {
 // 		}
 // 	}
 // }
-
-// TODO:
-//  array- and string-slices
