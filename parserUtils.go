@@ -449,8 +449,6 @@ func slice(v interface{}, from, to interface{}) interface{} {
 		panic(fmt.Errorf("range error: start-index %d is negative", fromInt))
 	}
 
-	fmt.Printf("FROM = %d, TO = %d\n", fromInt, toInt)
-
 	if isStr {
 		if toInt < 0 || toInt > len(str) {
 			panic(fmt.Errorf("range error: end-index %d is out of range [0, %d]", toInt, len(str)))

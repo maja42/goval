@@ -64,25 +64,26 @@ result, err := eval.Evaluate(`strlen(arch[:2]) + strlen("text")`, variables, fun
 # Alternative Libraries
 
 If you are looking for a generic evaluation library, 
-you probably know about [Knetic/govaluate](https://github.com/Knetic/govaluate).
-
-I also used that library in my own projects at first, but I quickly noticed a few shortcomings and limitations, 
-which led be to create my own library. The main differences are:
+you can also take a look at [Knetic/govaluate](https://github.com/Knetic/govaluate).
+I used that library myself, but due to a few shortcomings I decided to create goval. 
+The main differences are:
 
 - Full support for arrays and objects.
 - Accessing variables (maps) via `.` and `[]` syntax
 - Support for array- and object concatenation.
 - Array literals with `[]` as well as object literals with `{}`
-- Differentiation between `int` and `float64`.
-- Type-aware bit-operations (they only work with `int`).
-- Hex-Literals (useful as soon as bit-operations are needed).
+- Opaque differentiation between `int` and `float64`. \
+  The underlying type is automatically converted as long as no precision is lost.
+- Type-aware bit-operations (they only work with `int`-numbers).
+- Hex-Literals (useful as soon as bit-operations are involved).
 - No support for dates (strings are just strings, they don't have a special meaning, even if they look like dates).\
-  Support for dates and other types like structs *could* be added if needed.
+  Support for dates and structs *could* be added if needed.
 - Useful error messages.
 - Written with go/scanner and goyacc. \
     This vastly reduces code size (and therefore vulnerabilities to bugs),
     creates super-fast code and allows new features to be added in minutes, rather than days.
-- High test coverage (including special cases like 32 and 64bit architectural differences)
+- High test coverage (including lots of special cases).\
+  Also tested on 32 and 64bit architectures, where some (documented) operations like a bitwise-not can behave differently depending on the size of `int`. 
 
 For a full list of features, please refer to the documentation below.
 
@@ -92,13 +93,14 @@ For a full list of features, please refer to the documentation below.
 
 This library fully supports the following types: `nil`, `bool`, `int`, `float64`, `string`, `[]interface{}` (=arrays) and `map[string]interface{}` (=objects). 
 
+Within expressions, `int` and `float64` both have the type `number` and are completely transparent.\
 If necessary, numerical values will be automatically converted between `int` and `float64`, as long as no precision is lost.
 
 Arrays and Objects are untyped. They can store any other value ("mixed arrays").
 
 ## Variables
 
-It is possible directly access custom-defined variables.
+It is possible to directly access custom-defined variables.
 Variables are read-only and cannot be modified from within expressions.
 
 Examples:
@@ -281,12 +283,12 @@ Examples:
 
 Performs a deep-compare between the two operands.
 When comparing `int` and `float64`, 
-the integer will be casted to a floating point number.
+the integer will be cast to a floating point number.
 
 #### Comparisons `<`, `>`, `<=`, `>=`
 
 Compares two numbers. If one side of the operator is an integer and the other is a floating point number,
-the integer number will be casted. This might lead to unexpected results for very big numbers which are rounded
+the integer number will be cast. This might lead to unexpected results for very big numbers which are rounded
 during that process.
 
 Examples:
@@ -327,7 +329,7 @@ Examples:
 
 #### Logical Or `|`, Logical And `&`, Logical XOr `^`
 
-If one side of the operator is a floating point number, the number is casted to an integer if possible. 
+If one side of the operator is a floating point number, the number is cast to an integer if possible. 
 If decimal places would be lost during that process, it is considered a type error.
 The resulting number is always an integer.
 
@@ -348,7 +350,7 @@ Examples:
 
 #### Bitwise Not `~`
 
-If performed on a floating point number, the number is casted to an integer if possible. 
+If performed on a floating point number, the number is cast to an integer if possible. 
 If decimal places would be lost during that process, it is considered a type error.
 The resulting number is always an integer.
 
@@ -367,7 +369,7 @@ Examples:
 
 #### Bit-Shift `<<`, `>>`
 
-If one side of the operator is a floating point number, the number is casted to an integer if possible. 
+If one side of the operator is a floating point number, the number is cast to an integer if possible. 
 If decimal places would be lost during that process, it is considered a type error.
 The resulting number is always an integer.
 
