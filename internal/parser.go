@@ -1,9 +1,9 @@
-//line parser.go.y:2
+//line parser.go.y:1
 package internal
 
 import __yyfmt__ "fmt"
 
-//line parser.go.y:2
+//line parser.go.y:3
 //line parser.go.y:6
 type yySymType struct {
 	yys      int
