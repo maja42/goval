@@ -13,7 +13,7 @@ func init() {
 }
 
 // ExpressionFunction can be called from within expressions.
-// The returned object needs to have one of the following types: `nil`, `bool`, `int`, `float64`, `[]interface{}` or `map[string]interface{}`.
+// The returned object needs to have one of the following types: `nil`, `bool`, `int`, `float64`, `string`, `[]interface{}` or `map[string]interface{}`.
 type ExpressionFunction = func(args ...interface{}) (interface{}, error)
 
 func typeOf(val interface{}) string {
