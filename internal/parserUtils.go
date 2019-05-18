@@ -428,6 +428,27 @@ func accessField(s interface{}, field interface{}) interface{} {
 		return arrVar[intIdx]
 	}
 
+	v := reflect.ValueOf(s)
+	for v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	if v.Kind() == reflect.Struct {
+		key, ok := field.(string)
+		if !ok {
+			panic(fmt.Errorf("syntax error: object key must be string, but was %s", typeOf(field)))
+		}
+
+		if key[0] >= 'a' && key[0] <= 'z' {
+			panic(fmt.Errorf("var error: private members are inaccessible for field %q", field))
+		}
+
+		fieldReflect := v.FieldByName(key)
+		if !fieldReflect.IsValid() {
+			panic(fmt.Errorf("var error: object has no member %q", field))
+		}
+		return fieldReflect.Interface()
+	}
+
 	panic(fmt.Errorf("syntax error: cannot access fields on type %s", typeOf(s)))
 }
 
