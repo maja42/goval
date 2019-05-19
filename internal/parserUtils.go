@@ -439,6 +439,10 @@ func accessField(s interface{}, field interface{}) interface{} {
 	if v.Kind() == reflect.Struct {
 		key := asObjectKey(field)
 
+		if v.MethodByName(key).IsValid() {
+			panic(fmt.Errorf("syntax error: object member %q is a method and currently unsupported", field))
+		}
+
 		name := v.FieldByName(key)
 		fieldReflect = &name
 	} else if v.Kind() == reflect.Slice {

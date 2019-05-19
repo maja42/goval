@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"strconv"
 	"testing"
+	"time"
 )
 
 func Test_Literals_Simple(t *testing.T) {
@@ -1163,6 +1164,7 @@ func Test_VariableAccess_Structs(t *testing.T) {
 		SliceField []NestedTestType
 		SliceFieldInterface []interface{}
 		SliceFieldPtr []*NestedTestType
+		BuiltIn time.Time
 
 		nonExportable string
 	}
@@ -1189,6 +1191,7 @@ func Test_VariableAccess_Structs(t *testing.T) {
 			SliceField: []NestedTestType{{Name:"l",nonExportable:"m"}},
 			SliceFieldInterface: []interface{}{NestedTestType{Name:"n",nonExportable:"o"}},
 			SliceFieldPtr: []*NestedTestType{{Name:"p",nonExportable:"q"}},
+			BuiltIn: time.Now(),
 			nonExportable: "r",
 		},
 	}
@@ -1207,6 +1210,7 @@ func Test_VariableAccess_Structs(t *testing.T) {
 	assertEvalError(t, vars, `var error: object member "nonExportable" is inaccessible`, `obj.nonExportable`)
 	assertEvalError(t, vars, `var error: object has no member "nonExistend"`, `obj.Nested.nonExistend`)
 	assertEvalError(t, vars, `var error: object member "nonExportable" is inaccessible`, `obj.Nested.nonExportable`)
+	assertEvalError(t, vars, `syntax error: object member "String" is a method and currently unsupported`, `obj.BuiltIn.String()`)
 }
 
 func Test_VariableAccess_DynamicAccess(t *testing.T) {
