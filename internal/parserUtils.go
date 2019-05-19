@@ -376,6 +376,22 @@ func asObjectKey(key interface{}) string {
 	return s
 }
 
+func asObjectIdx(key interface{}) int {
+	intIdx, ok := key.(int)
+	if !ok {
+		floatIdx, ok := key.(float64)
+		if !ok {
+			panic(fmt.Errorf("syntax error: array index must be number, but was %s", typeOf(key)))
+		}
+		intIdx = int(floatIdx)
+		if float64(intIdx) != floatIdx {
+			panic(fmt.Errorf("eval error: array index must be whole number, but was %f", floatIdx))
+		}
+	}
+
+	return intIdx
+}
+
 func addObjectMember(obj map[string]interface{}, key, val interface{}) map[string]interface{} {
 	s := asObjectKey(key)
 	_, ok := obj[s]
@@ -397,10 +413,7 @@ func accessVar(variables map[string]interface{}, varName string) interface{} {
 func accessField(s interface{}, field interface{}) interface{} {
 	obj, ok := s.(map[string]interface{})
 	if ok {
-		key, ok := field.(string)
-		if !ok {
-			panic(fmt.Errorf("syntax error: object key must be string, but was %s", typeOf(field)))
-		}
+		key := asObjectKey(field)
 		val, ok := obj[key]
 		if !ok {
 			panic(fmt.Errorf("var error: object has no member %q", field))
@@ -410,18 +423,7 @@ func accessField(s interface{}, field interface{}) interface{} {
 
 	arrVar, ok := s.([]interface{})
 	if ok {
-		intIdx, ok := field.(int)
-		if !ok {
-			floatIdx, ok := field.(float64)
-			if !ok {
-				panic(fmt.Errorf("syntax error: array index must be number, but was %s", typeOf(field)))
-			}
-			intIdx = int(floatIdx)
-			if float64(intIdx) != floatIdx {
-				panic(fmt.Errorf("eval error: array index must be whole number, but was %f", floatIdx))
-			}
-		}
-
+		intIdx := asObjectIdx(field)
 		if intIdx < 0 || intIdx >= len(arrVar) {
 			panic(fmt.Errorf("var error: array index %d is out of range [%d, %d]", intIdx, 0, len(arrVar)))
 		}
@@ -429,23 +431,35 @@ func accessField(s interface{}, field interface{}) interface{} {
 	}
 
 	v := reflect.ValueOf(s)
-	for v.Kind() == reflect.Ptr {
+	for v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface {
 		v = v.Elem()
 	}
+
+	var fieldReflect *reflect.Value
 	if v.Kind() == reflect.Struct {
-		key, ok := field.(string)
-		if !ok {
-			panic(fmt.Errorf("syntax error: object key must be string, but was %s", typeOf(field)))
+		key := asObjectKey(field)
+
+		name := v.FieldByName(key)
+		fieldReflect = &name
+	} else if v.Kind() == reflect.Slice {
+		intIdx := asObjectIdx(field)
+
+		if intIdx < 0 || intIdx >= v.Len() {
+			panic(fmt.Errorf("var error: array index %d is out of range [%d, %d]", intIdx, 0, v.Len()))
 		}
 
-		if key[0] >= 'a' && key[0] <= 'z' {
-			panic(fmt.Errorf("var error: private members are inaccessible for field %q", field))
-		}
+		idx := v.Index(intIdx)
+		fieldReflect = &idx
+	}
 
-		fieldReflect := v.FieldByName(key)
+	if fieldReflect != nil {
 		if !fieldReflect.IsValid() {
 			panic(fmt.Errorf("var error: object has no member %q", field))
 		}
+		if !fieldReflect.CanInterface() {
+			panic(fmt.Errorf("var error: object member %q is inaccessible", field))
+		}
+
 		return fieldReflect.Interface()
 	}
 

@@ -1147,6 +1147,68 @@ func Test_VariableAccess_Nested(t *testing.T) {
 	assertEvaluation(t, vars, "b", `obj["d"]["b"]`)
 }
 
+func Test_VariableAccess_Structs(t *testing.T) {
+	type NestedTestType struct {
+		Name          string
+		nonExportable string
+	}
+
+	type TestType struct {
+		Title        string
+		Nested       NestedTestType
+		NestedPtr       *NestedTestType
+		Interfaced   interface{}
+		AnotherField interface{}
+		AnotherField2 interface{}
+		SliceField []NestedTestType
+		SliceFieldInterface []interface{}
+		SliceFieldPtr []*NestedTestType
+
+		nonExportable string
+	}
+
+	nestedPointer := &NestedTestType{
+		Name:          "a",
+		nonExportable: "b",
+	}
+
+	vars := map[string]interface{}{
+		"obj": TestType{
+			Title:         "c",
+			Nested:        NestedTestType{Name: "d", nonExportable: "e"},
+			NestedPtr:        &NestedTestType{Name: "f", nonExportable: "g"},
+			Interfaced:    NestedTestType{
+				Name:          "h",
+				nonExportable: "i",
+			},
+			AnotherField:  &NestedTestType{
+				Name:          "j",
+				nonExportable: "k",
+			},
+			AnotherField2:  &nestedPointer,
+			SliceField: []NestedTestType{{Name:"l",nonExportable:"m"}},
+			SliceFieldInterface: []interface{}{NestedTestType{Name:"n",nonExportable:"o"}},
+			SliceFieldPtr: []*NestedTestType{{Name:"p",nonExportable:"q"}},
+			nonExportable: "r",
+		},
+	}
+
+	assertEvaluation(t, vars, "c", `obj.Title`)
+	assertEvaluation(t, vars, "d", `obj.Nested.Name`)
+	assertEvaluation(t, vars, "f", `obj.NestedPtr.Name`)
+	assertEvaluation(t, vars, "h", `obj.Interfaced.Name`)
+	assertEvaluation(t, vars, "j", `obj.AnotherField.Name`)
+	assertEvaluation(t, vars, "a", `obj.AnotherField2.Name`)
+	assertEvaluation(t, vars, "l", `obj.SliceField[0].Name`)
+	assertEvaluation(t, vars, "n", `obj.SliceFieldInterface[0].Name`)
+	assertEvaluation(t, vars, "p", `obj.SliceFieldPtr[0].Name`)
+
+	assertEvalError(t, vars, `var error: object has no member "nonExistend"`, `obj.nonExistend`)
+	assertEvalError(t, vars, `var error: object member "nonExportable" is inaccessible`, `obj.nonExportable`)
+	assertEvalError(t, vars, `var error: object has no member "nonExistend"`, `obj.Nested.nonExistend`)
+	assertEvalError(t, vars, `var error: object member "nonExportable" is inaccessible`, `obj.Nested.nonExportable`)
+}
+
 func Test_VariableAccess_DynamicAccess(t *testing.T) {
 	vars := map[string]interface{}{
 		"num0": 0,
