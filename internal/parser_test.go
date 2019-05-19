@@ -135,9 +135,9 @@ func Test_Literals_Objects_DuplicateKey(t *testing.T) {
 }
 
 func Test_Literals_Objects_InvalidKeyType(t *testing.T) {
-	assertEvalError(t, nil, "type error: object key must be string, but was nil", `{nil: 0}`)
-	assertEvalError(t, nil, "type error: object key must be string, but was number", `{0: 0}`)
-	assertEvalError(t, nil, "type error: object key must be string, but was number", `{"a": 0, 1: 0}`)
+	assertEvalError(t, nil, "syntax error: object key must be string, but was nil", `{nil: 0}`)
+	assertEvalError(t, nil, "syntax error: object key must be string, but was number", `{0: 0}`)
+	assertEvalError(t, nil, "syntax error: object key must be string, but was number", `{"a": 0, 1: 0}`)
 }
 
 func Test_MissingOperator(t *testing.T) {
