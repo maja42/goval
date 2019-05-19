@@ -1155,16 +1155,16 @@ func Test_VariableAccess_Structs(t *testing.T) {
 	}
 
 	type TestType struct {
-		Title        string
-		Nested       NestedTestType
-		NestedPtr       *NestedTestType
-		Interfaced   interface{}
-		AnotherField interface{}
-		AnotherField2 interface{}
-		SliceField []NestedTestType
+		Title               string
+		Nested              NestedTestType
+		NestedPtr           *NestedTestType
+		Interfaced          interface{}
+		AnotherField        interface{}
+		AnotherField2       interface{}
+		SliceField          []NestedTestType
 		SliceFieldInterface []interface{}
-		SliceFieldPtr []*NestedTestType
-		BuiltIn time.Time
+		SliceFieldPtr       []*NestedTestType
+		BuiltIn             time.Time
 
 		nonExportable string
 	}
@@ -1176,23 +1176,23 @@ func Test_VariableAccess_Structs(t *testing.T) {
 
 	vars := map[string]interface{}{
 		"obj": TestType{
-			Title:         "c",
-			Nested:        NestedTestType{Name: "d", nonExportable: "e"},
-			NestedPtr:        &NestedTestType{Name: "f", nonExportable: "g"},
-			Interfaced:    NestedTestType{
+			Title:     "c",
+			Nested:    NestedTestType{Name: "d", nonExportable: "e"},
+			NestedPtr: &NestedTestType{Name: "f", nonExportable: "g"},
+			Interfaced: NestedTestType{
 				Name:          "h",
 				nonExportable: "i",
 			},
-			AnotherField:  &NestedTestType{
+			AnotherField: &NestedTestType{
 				Name:          "j",
 				nonExportable: "k",
 			},
-			AnotherField2:  &nestedPointer,
-			SliceField: []NestedTestType{{Name:"l",nonExportable:"m"}},
-			SliceFieldInterface: []interface{}{NestedTestType{Name:"n",nonExportable:"o"}},
-			SliceFieldPtr: []*NestedTestType{{Name:"p",nonExportable:"q"}},
-			BuiltIn: time.Now(),
-			nonExportable: "r",
+			AnotherField2:       &nestedPointer,
+			SliceField:          []NestedTestType{{Name: "l", nonExportable: "m"}},
+			SliceFieldInterface: []interface{}{NestedTestType{Name: "n", nonExportable: "o"}},
+			SliceFieldPtr:       []*NestedTestType{{Name: "p", nonExportable: "q"}},
+			BuiltIn:             time.Now(),
+			nonExportable:       "r",
 		},
 	}
 
