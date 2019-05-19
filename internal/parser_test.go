@@ -1164,6 +1164,7 @@ func Test_VariableAccess_Structs(t *testing.T) {
 		SliceField          []NestedTestType
 		SliceFieldInterface []interface{}
 		SliceFieldPtr       []*NestedTestType
+		Maps                map[string]string
 		BuiltIn             time.Time
 
 		nonExportable string
@@ -1191,8 +1192,9 @@ func Test_VariableAccess_Structs(t *testing.T) {
 			SliceField:          []NestedTestType{{Name: "l", nonExportable: "m"}},
 			SliceFieldInterface: []interface{}{NestedTestType{Name: "n", nonExportable: "o"}},
 			SliceFieldPtr:       []*NestedTestType{{Name: "p", nonExportable: "q"}},
+			Maps:                map[string]string{"Name": "r"},
 			BuiltIn:             time.Now(),
-			nonExportable:       "r",
+			nonExportable:       "s",
 		},
 	}
 
@@ -1205,6 +1207,7 @@ func Test_VariableAccess_Structs(t *testing.T) {
 	assertEvaluation(t, vars, "l", `obj.SliceField[0].Name`)
 	assertEvaluation(t, vars, "n", `obj.SliceFieldInterface[0].Name`)
 	assertEvaluation(t, vars, "p", `obj.SliceFieldPtr[0].Name`)
+	assertEvaluation(t, vars, "r", `obj.Maps.Name`)
 
 	assertEvalError(t, vars, `var error: object has no member "nonExistend"`, `obj.nonExistend`)
 	assertEvalError(t, vars, `var error: object member "nonExportable" is inaccessible`, `obj.nonExportable`)

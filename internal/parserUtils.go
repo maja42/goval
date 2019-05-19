@@ -436,7 +436,8 @@ func accessField(s interface{}, field interface{}) interface{} {
 	}
 
 	var fieldReflect *reflect.Value
-	if v.Kind() == reflect.Struct {
+	kind := v.Kind()
+	if kind == reflect.Struct {
 		key := asObjectKey(field)
 
 		if v.MethodByName(key).IsValid() {
@@ -445,7 +446,7 @@ func accessField(s interface{}, field interface{}) interface{} {
 
 		name := v.FieldByName(key)
 		fieldReflect = &name
-	} else if v.Kind() == reflect.Slice {
+	} else if kind == reflect.Slice {
 		intIdx := asObjectIdx(field)
 
 		if intIdx < 0 || intIdx >= v.Len() {
@@ -453,6 +454,10 @@ func accessField(s interface{}, field interface{}) interface{} {
 		}
 
 		idx := v.Index(intIdx)
+		fieldReflect = &idx
+	} else if kind == reflect.Map {
+		key := asObjectKey(field)
+		idx := v.MapIndex(reflect.ValueOf(key))
 		fieldReflect = &idx
 	}
 
