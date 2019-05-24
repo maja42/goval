@@ -65,10 +65,8 @@ result, err := eval.Evaluate(`strlen(arch[:2]) + strlen("text")`, variables, fun
 
 ## Types
 
-This library fully supports the following types: `nil`, `bool`, `int`, `float64`, `string`, `[]interface{}` (=arrays) and `map[string]interface{}` (=objects). 
+This library fully supports the following types: `nil`, `bool`, `int`, `float64`, `string`, `[]interface{}` (=arrays), `map[string]interface{}` (=objects) and custom `struct` types.
 
-The library also has partial support for `struct` types and maps with non-string keys. 
-Certain operations on these types (like object concatenations) are not yet supported.  
 
 Within expressions, `int` and `float64` both have the type `number` and are completely transparent.\
 If necessary, numerical values will be automatically converted between `int` and `float64`, as long as no precision is lost.
