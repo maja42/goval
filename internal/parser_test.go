@@ -136,9 +136,9 @@ func Test_Literals_Objects_DuplicateKey(t *testing.T) {
 }
 
 func Test_Literals_Objects_InvalidKeyType(t *testing.T) {
-	assertEvalError(t, nil, "syntax error: object key must be string, but was nil", `{nil: 0}`)
-	assertEvalError(t, nil, "syntax error: object key must be string, but was number", `{0: 0}`)
-	assertEvalError(t, nil, "syntax error: object key must be string, but was number", `{"a": 0, 1: 0}`)
+	assertEvalError(t, nil, "type error: object key must be string, but was nil", `{nil: 0}`)
+	assertEvalError(t, nil, "type error: object key must be string, but was number", `{0: 0}`)
+	assertEvalError(t, nil, "type error: object key must be string, but was number", `{"a": 0, 1: 0}`)
 }
 
 func Test_MissingOperator(t *testing.T) {
@@ -1022,7 +1022,7 @@ func Test_VariableAccess_DotSyntax_InvalidType(t *testing.T) {
 	vars := getTestVars()
 	assertEvalError(t, vars, "syntax error: unexpected LITERAL_NUMBER", "obj.0")
 
-	assertEvalError(t, vars, "syntax error: array index must be number, but was string", "arr.key")
+	assertEvalError(t, vars, "type error: array index must be number, but was string", "arr.key")
 	assertEvalError(t, vars, "syntax error: cannot access fields on type string", `"txt".key`)
 	assertEvalError(t, vars, "syntax error: cannot access fields on type nil", `nil.key`)
 	assertEvalError(t, vars, "syntax error: cannot access fields on type number", `4.2.key`)
@@ -1077,16 +1077,16 @@ func Test_VariableAccess_ArraySyntax_DoesNotExist(t *testing.T) {
 
 func Test_VariableAccess_ArraySyntax_InvalidType(t *testing.T) {
 	vars := getTestVars()
-	assertEvalError(t, vars, "syntax error: object key must be string, but was bool", `obj[true]`)
-	assertEvalError(t, vars, "syntax error: object key must be string, but was number", `obj[0]`)
-	assertEvalError(t, vars, "syntax error: object key must be string, but was array", `obj[arr]`)
-	assertEvalError(t, vars, "syntax error: object key must be string, but was object", `obj[obj]`)
+	assertEvalError(t, vars, "type error: object key must be string, but was bool", `obj[true]`)
+	assertEvalError(t, vars, "type error: object key must be string, but was number", `obj[0]`)
+	assertEvalError(t, vars, "type error: object key must be string, but was array", `obj[arr]`)
+	assertEvalError(t, vars, "type error: object key must be string, but was object", `obj[obj]`)
 
-	assertEvalError(t, vars, "syntax error: array index must be number, but was bool", `arr[true]`)
-	assertEvalError(t, vars, "syntax error: array index must be number, but was string", `arr["0"]`)
-	assertEvalError(t, vars, "syntax error: array index must be number, but was string", `["0"]["0"]`)
-	assertEvalError(t, vars, "syntax error: array index must be number, but was array", `arr[arr]`)
-	assertEvalError(t, vars, "syntax error: array index must be number, but was object", `arr[obj]`)
+	assertEvalError(t, vars, "type error: array index must be number, but was bool", `arr[true]`)
+	assertEvalError(t, vars, "type error: array index must be number, but was string", `arr["0"]`)
+	assertEvalError(t, vars, "type error: array index must be number, but was string", `["0"]["0"]`)
+	assertEvalError(t, vars, "type error: array index must be number, but was array", `arr[arr]`)
+	assertEvalError(t, vars, "type error: array index must be number, but was object", `arr[obj]`)
 
 	assertEvalError(t, vars, "syntax error: cannot access fields on type string", `"txt"[0]`)
 	assertEvalError(t, vars, "syntax error: cannot access fields on type nil", `nil[0]`)
@@ -1095,10 +1095,10 @@ func Test_VariableAccess_ArraySyntax_InvalidType(t *testing.T) {
 
 func Test_VariableAccess_ArraySyntax_FloatHasDecimals(t *testing.T) {
 	vars := getTestVars()
-	assertEvalError(t, vars, "eval error: array index must be whole number, but was 0.100000", `arr[0.1]`)
-	assertEvalError(t, vars, "eval error: array index must be whole number, but was 0.500000", `arr[0.5]`)
-	assertEvalError(t, vars, "eval error: array index must be whole number, but was 0.900000", `arr[0.9]`)
-	assertEvalError(t, vars, "eval error: array index must be whole number, but was 2.000100", `arr[2.0001]`)
+	assertEvalError(t, vars, "type error: array index must be whole number, but was 0.100000", `arr[0.1]`)
+	assertEvalError(t, vars, "type error: array index must be whole number, but was 0.500000", `arr[0.5]`)
+	assertEvalError(t, vars, "type error: array index must be whole number, but was 0.900000", `arr[0.9]`)
+	assertEvalError(t, vars, "type error: array index must be whole number, but was 2.000100", `arr[2.0001]`)
 }
 
 func Test_VariableAccess_Nested(t *testing.T) {

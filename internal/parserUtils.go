@@ -371,7 +371,7 @@ func compareFloat(val1 float64, val2 float64, operation string) bool {
 func asObjectKey(key interface{}) string {
 	s, ok := key.(string)
 	if !ok {
-		panic(fmt.Errorf("syntax error: object key must be string, but was %s", typeOf(key)))
+		panic(fmt.Errorf("type error: object key must be string, but was %s", typeOf(key)))
 	}
 	return s
 }
@@ -381,11 +381,11 @@ func asObjectIdx(key interface{}) int {
 	if !ok {
 		floatIdx, ok := key.(float64)
 		if !ok {
-			panic(fmt.Errorf("syntax error: array index must be number, but was %s", typeOf(key)))
+			panic(fmt.Errorf("type error: array index must be number, but was %s", typeOf(key)))
 		}
 		intIdx = int(floatIdx)
 		if float64(intIdx) != floatIdx {
-			panic(fmt.Errorf("eval error: array index must be whole number, but was %f", floatIdx))
+			panic(fmt.Errorf("type error: array index must be whole number, but was %f", floatIdx))
 		}
 	}
 
