@@ -1213,7 +1213,7 @@ func Test_VariableAccess_Structs(t *testing.T) {
 	assertEvalError(t, vars, `var error: object member "nonExportable" is inaccessible`, `obj.nonExportable`)
 	assertEvalError(t, vars, `var error: object has no member "nonExistend"`, `obj.Nested.nonExistend`)
 	assertEvalError(t, vars, `var error: object member "nonExportable" is inaccessible`, `obj.Nested.nonExportable`)
-	assertEvalError(t, vars, `syntax error: object member "String" is a method and currently unsupported`, `obj.BuiltIn.String()`)
+	assertEvalError(t, vars, `var error: object member "String" is inaccessible`, `obj.BuiltIn.String()`)
 }
 
 func Test_VariableAccess_DynamicAccess(t *testing.T) {

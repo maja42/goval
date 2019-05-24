@@ -376,7 +376,7 @@ func asObjectKey(key interface{}) string {
 	return s
 }
 
-func asObjectIdx(key interface{}) int {
+func asArrayIdx(key interface{}) int {
 	intIdx, ok := key.(int)
 	if !ok {
 		floatIdx, ok := key.(float64)
@@ -411,25 +411,6 @@ func accessVar(variables map[string]interface{}, varName string) interface{} {
 }
 
 func accessField(s interface{}, field interface{}) interface{} {
-	obj, ok := s.(map[string]interface{})
-	if ok {
-		key := asObjectKey(field)
-		val, ok := obj[key]
-		if !ok {
-			panic(fmt.Errorf("var error: object has no member %q", field))
-		}
-		return val
-	}
-
-	arrVar, ok := s.([]interface{})
-	if ok {
-		intIdx := asObjectIdx(field)
-		if intIdx < 0 || intIdx >= len(arrVar) {
-			panic(fmt.Errorf("var error: array index %d is out of range [%d, %d]", intIdx, 0, len(arrVar)))
-		}
-		return arrVar[intIdx]
-	}
-
 	v := reflect.ValueOf(s)
 	for v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface {
 		v = v.Elem()
@@ -437,17 +418,18 @@ func accessField(s interface{}, field interface{}) interface{} {
 
 	var fieldReflect *reflect.Value
 	kind := v.Kind()
+
 	if kind == reflect.Struct {
 		key := asObjectKey(field)
 
 		if v.MethodByName(key).IsValid() {
-			panic(fmt.Errorf("syntax error: object member %q is a method and currently unsupported", field))
+			panic(fmt.Errorf("var error: object member %q is inaccessible", field))
 		}
 
 		name := v.FieldByName(key)
 		fieldReflect = &name
 	} else if kind == reflect.Slice {
-		intIdx := asObjectIdx(field)
+		intIdx := asArrayIdx(field)
 
 		if intIdx < 0 || intIdx >= v.Len() {
 			panic(fmt.Errorf("var error: array index %d is out of range [%d, %d]", intIdx, 0, v.Len()))
@@ -459,20 +441,18 @@ func accessField(s interface{}, field interface{}) interface{} {
 		key := asObjectKey(field)
 		idx := v.MapIndex(reflect.ValueOf(key))
 		fieldReflect = &idx
+	} else {
+		panic(fmt.Errorf("syntax error: cannot access fields on type %s", typeOf(s)))
 	}
 
-	if fieldReflect != nil {
-		if !fieldReflect.IsValid() {
-			panic(fmt.Errorf("var error: object has no member %q", field))
-		}
-		if !fieldReflect.CanInterface() {
-			panic(fmt.Errorf("var error: object member %q is inaccessible", field))
-		}
-
-		return fieldReflect.Interface()
+	if !fieldReflect.IsValid() {
+		panic(fmt.Errorf("var error: object has no member %q", field))
+	}
+	if !fieldReflect.CanInterface() {
+		panic(fmt.Errorf("var error: object member %q is inaccessible", field))
 	}
 
-	panic(fmt.Errorf("syntax error: cannot access fields on type %s", typeOf(s)))
+	return fieldReflect.Interface()
 }
 
 func slice(v interface{}, from, to interface{}) interface{} {
