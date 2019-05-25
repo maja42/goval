@@ -36,7 +36,7 @@ func typeOf(val interface{}) string {
 		return "array"
 	}
 
-	return "<unknown type>"
+	return fmt.Sprintf("<%s>", kind.String())
 }
 
 func asBool(val interface{}) bool {
