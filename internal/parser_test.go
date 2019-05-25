@@ -312,6 +312,10 @@ func Test_Add_IncompatibleTypes(t *testing.T) {
 	assertEvalError(t, vars, "type error: cannot add or concatenate type array and object", `arr + obj`)
 	assertEvalError(t, vars, "type error: cannot add or concatenate type object and array", `obj + arr`)
 	assertEvalError(t, vars, "type error: cannot add or concatenate type nil and array", `nil + arr`)
+
+	assertEvalError(t, vars, `type error: cannot add or concatenate type object and object`, `struct + struct`)
+	assertEvalError(t, vars, `type error: cannot add or concatenate type object and array`, `struct + slice`)
+	assertEvalError(t, vars, `type error: cannot add or concatenate type object and object`, `struct + map`)
 }
 
 func Test_UnaryMinus(t *testing.T) {
@@ -338,6 +342,10 @@ func Test_UnaryMinus_IncompatibleTypes(t *testing.T) {
 
 	assertEvalError(t, vars, "type error: unary minus requires number, but was array", `-arr`)
 	assertEvalError(t, vars, "type error: unary minus requires number, but was object", `-obj`)
+
+	assertEvalError(t, vars, "type error: unary minus requires number, but was object", `-struct`)
+	assertEvalError(t, vars, "type error: unary minus requires number, but was array", `-slice`)
+	assertEvalError(t, vars, "type error: unary minus requires number, but was object", `-map`)
 }
 
 func Test_Arithmetic_Subtract(t *testing.T) {
@@ -428,8 +436,8 @@ func Test_Arithmetic_Modulo(t *testing.T) {
 
 func Test_Arithmetic_InvalidTypes(t *testing.T) {
 	vars := getTestVars()
-	allTypes := []string{"nil", "true", "false", "42", "4.2", `"text"`, `"0"`, "[0]", "[]", "arr", `{"a":0}`, "{}", "obj"}
-	typeOfAllTypes := []string{"nil", "bool", "bool", "number", "number", "string", "string", "array", "array", "array", "object", "object", "object"}
+	allTypes := []string{"nil", "true", "false", "42", "4.2", `"text"`, `"0"`, "[0]", "[]", "arr", `{"a":0}`, "{}", "obj", "struct", "slice", "map"}
+	typeOfAllTypes := []string{"nil", "bool", "bool", "number", "number", "string", "string", "array", "array", "array", "object", "object", "object", "object", "array", "object"}
 
 	for idx1, t1 := range allTypes {
 		for idx2, t2 := range allTypes {
@@ -514,8 +522,8 @@ func Test_AndOr_Order(t *testing.T) {
 
 func Test_AndOr_InvalidTypes(t *testing.T) {
 	vars := getTestVars()
-	allTypes := []string{"nil", "true", "false", "42", "4.2", `"text"`, `"0"`, "[0]", "[]", "arr", `{"a":0}`, "{}", "obj"}
-	typeOfAllTypes := []string{"nil", "bool", "bool", "number", "number", "string", "string", "array", "array", "array", "object", "object", "object"}
+	allTypes := []string{"nil", "true", "false", "42", "4.2", `"text"`, `"0"`, "[0]", "[]", "arr", `{"a":0}`, "{}", "obj", "struct", "slice", "map"}
+	typeOfAllTypes := []string{"nil", "bool", "bool", "number", "number", "string", "string", "array", "array", "array", "object", "object", "object", "object", "array", "object"}
 
 	for idx1, t1 := range allTypes {
 		for idx2, t2 := range allTypes {
@@ -740,8 +748,8 @@ func Test_CompareHugeIntegers(t *testing.T) {
 
 func Test_Compare_InvalidTypes(t *testing.T) {
 	vars := getTestVars()
-	allTypes := []string{"nil", "true", "false", "42", "4.2", `"text"`, `"0"`, "[0]", "[]", "arr", `{"a":0}`, "{}", "obj"}
-	typeOfAllTypes := []string{"nil", "bool", "bool", "number", "number", "string", "string", "array", "array", "array", "object", "object", "object"}
+	allTypes := []string{"nil", "true", "false", "42", "4.2", `"text"`, `"0"`, "[0]", "[]", "arr", `{"a":0}`, "{}", "obj", "struct", "slice", "map"}
+	typeOfAllTypes := []string{"nil", "bool", "bool", "number", "number", "string", "string", "array", "array", "array", "object", "object", "object", "object", "array", "object"}
 
 	for idx1, t1 := range allTypes {
 		for idx2, t2 := range allTypes {
@@ -908,8 +916,8 @@ func Test_BitManipulation_NegativeShift(t *testing.T) {
 
 func Test_BitManipulation_InvalidTypes(t *testing.T) {
 	vars := getTestVars()
-	allTypes := []string{"nil", "true", "false", "42", "4.0", `"text"`, `"0"`, "[0]", "[]", "arr", `{"a":0}`, "{}", "obj"}
-	typeOfAllTypes := []string{"nil", "bool", "bool", "number", "number", "string", "string", "array", "array", "array", "object", "object", "object"}
+	allTypes := []string{"nil", "true", "false", "42", "4.0", `"text"`, `"0"`, "[0]", "[]", "arr", `{"a":0}`, "{}", "obj", "struct", "slice", "map"}
+	typeOfAllTypes := []string{"nil", "bool", "bool", "number", "number", "string", "string", "array", "array", "array", "object", "object", "object", "object", "array", "object"}
 
 	for idx1, t1 := range allTypes {
 		for idx2, t2 := range allTypes {
@@ -1016,11 +1024,13 @@ func Test_VariableAccess_DotSyntax_DoesNotExist(t *testing.T) {
 	assertEvalError(t, vars, "var error: object has no member \"key\"", "obj.key.field")
 	assertEvalError(t, vars, "var error: object has no member \"key\"", "obj.key[0]")
 	assertEvalError(t, vars, "var error: object has no member \"key\"", "obj.key[fieldName]")
+	assertEvalError(t, vars, "var error: object has no member \"key\"", "struct.key")
 }
 
 func Test_VariableAccess_DotSyntax_InvalidType(t *testing.T) {
 	vars := getTestVars()
 	assertEvalError(t, vars, "syntax error: unexpected LITERAL_NUMBER", "obj.0")
+	assertEvalError(t, vars, "syntax error: unexpected LITERAL_NUMBER", "struct.0")
 
 	assertEvalError(t, vars, "type error: array index must be number, but was string", "arr.key")
 	assertEvalError(t, vars, "syntax error: cannot access fields on type string", `"txt".key`)
@@ -1031,6 +1041,7 @@ func Test_VariableAccess_DotSyntax_InvalidType(t *testing.T) {
 func Test_VariableAccess_DotSyntax_InvalidSyntax(t *testing.T) {
 	vars := getTestVars()
 	assertEvalError(t, vars, "syntax error: unexpected '[', expecting IDENT", "obj.[b]")
+	assertEvalError(t, vars, "syntax error: unexpected '[', expecting IDENT", "struct.[b]")
 }
 
 func Test_VariableAccess_ArraySyntax(t *testing.T) {
@@ -1081,6 +1092,11 @@ func Test_VariableAccess_ArraySyntax_InvalidType(t *testing.T) {
 	assertEvalError(t, vars, "type error: object key must be string, but was number", `obj[0]`)
 	assertEvalError(t, vars, "type error: object key must be string, but was array", `obj[arr]`)
 	assertEvalError(t, vars, "type error: object key must be string, but was object", `obj[obj]`)
+
+	assertEvalError(t, vars, "type error: object key must be string, but was bool", `struct[true]`)
+	assertEvalError(t, vars, "type error: object key must be string, but was number", `struct[0]`)
+	assertEvalError(t, vars, "type error: object key must be string, but was array", `struct[arr]`)
+	assertEvalError(t, vars, "type error: object key must be string, but was object", `struct[obj]`)
 
 	assertEvalError(t, vars, "type error: array index must be number, but was bool", `arr[true]`)
 	assertEvalError(t, vars, "type error: array index must be number, but was string", `arr["0"]`)
@@ -1536,13 +1552,16 @@ func assertEvalErrorFuncs(t *testing.T, variables map[string]interface{}, functi
 
 func getTestVars() map[string]interface{} {
 	return map[string]interface{}{
-		"nl":    nil,
-		"tr":    true,
-		"fl":    false,
-		"int":   42,
-		"float": 4.2,
-		"str":   "text",
-		"arr":   []interface{}{true, 21, 2.1, "txt"},
+		"nl":     nil,
+		"tr":     true,
+		"fl":     false,
+		"int":    42,
+		"float":  4.2,
+		"str":    "text",
+		"arr":    []interface{}{true, 21, 2.1, "txt"},
+		"struct": struct{ Test string }{"test"},
+		"slice":  []time.Time{time.Now()},
+		"map":    map[string]string{"name": "r"},
 		"obj": map[string]interface{}{
 			"b": false,
 			"i": 51,

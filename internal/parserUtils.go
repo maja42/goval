@@ -30,14 +30,10 @@ func typeOf(val interface{}) string {
 		return "number"
 	case reflect.String:
 		return "string"
-	}
-
-	if _, ok := val.([]interface{}); ok {
-		return "array"
-	}
-
-	if _, ok := val.(map[string]interface{}); ok {
+	case reflect.Struct, reflect.Map:
 		return "object"
+	case reflect.Slice:
+		return "array"
 	}
 
 	return "<unknown type>"
