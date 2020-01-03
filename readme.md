@@ -10,7 +10,13 @@ goval
 This library allows programs to evaluate arbitrary arithmetic/string/logic expressions.
 Custom extensions like variable access and function calls are supported.
 
-Please use the issue-tracker for any questions, feedback, bug-reports and feature-requests. 
+
+This project is considered stable and will not receive any new significant features.
+If new (major) features are required, they are likely to be integrated in a separate project instead.
+
+However, please use the issue-tracker for any questions, feedback and bug-reports.
+
+
 
 This project is licensed under the terms of the MIT license.
 
@@ -60,33 +66,6 @@ functions["strlen"] = func(args ...interface{}) (interface{}, error) {
 result, err := eval.Evaluate(`strlen(arch[:2]) + strlen("text")`, variables, functions) // Returns <6, nil>
 ```
 
-
-# Alternative Libraries
-
-If you are looking for a generic evaluation library, 
-you can also take a look at [Knetic/govaluate](https://github.com/Knetic/govaluate).
-I used that library myself, but due to a few shortcomings I decided to create goval. 
-The main differences are:
-
-- Full support for arrays and objects.
-- Accessing variables (maps) via `.` and `[]` syntax
-- Support for array- and object concatenation.
-- Array literals with `[]` as well as object literals with `{}`
-- Opaque differentiation between `int` and `float64`. \
-  The underlying type is automatically converted as long as no precision is lost.
-- Type-aware bit-operations (they only work with `int`-numbers).
-- Hex-Literals (useful as soon as bit-operations are involved).
-- No support for dates (strings are just strings, they don't have a special meaning, even if they look like dates).\
-  Support for dates and structs *could* be added if needed.
-- Useful error messages.
-- Written with go/scanner and goyacc. \
-    This vastly reduces code size (and therefore vulnerabilities to bugs),
-    creates super-fast code and allows new features to be added in minutes, rather than days.
-- High test coverage (including lots of special cases).\
-  Also tested on 32 and 64bit architectures, where some (documented) operations like a bitwise-not can behave differently depending on the size of `int`. 
-
-For a full list of features, please refer to the documentation below.
-
 # Documentation
 
 ## Types
@@ -97,6 +76,9 @@ Within expressions, `int` and `float64` both have the type `number` and are comp
 If necessary, numerical values will be automatically converted between `int` and `float64`, as long as no precision is lost.
 
 Arrays and Objects are untyped. They can store any other value ("mixed arrays").
+
+Structs are note supported to keep the functionality clear and manageable. 
+They would introduce too many edge cases and loose ends and are therefore out-of-scope. 
 
 ## Variables
 
@@ -457,5 +439,28 @@ arr[2:5]  // [2, 3, 4]
 arr[3:4]  // [3]
 ```
 
+# Alternative Libraries
+
+If you are looking for a generic evaluation library, 
+you can also take a look at [Knetic/govaluate](https://github.com/Knetic/govaluate).
+I used that library myself, but due to a few shortcomings I decided to create goval. 
+The main differences are:
+
+- Full support for arrays and objects.
+- Accessing variables (maps) via `.` and `[]` syntax
+- Support for array- and object concatenation.
+- Array literals with `[]` as well as object literals with `{}`
+- Opaque differentiation between `int` and `float64`. \
+  The underlying type is automatically converted as long as no precision is lost.
+- Type-aware bit-operations (they only work with `int`-numbers).
+- Hex-Literals (useful as soon as bit-operations are involved).
+- No support for dates (strings are just strings, they don't have a special meaning, even if they look like dates).\
+  Support for dates and structs *could* be added if needed.
+- Useful error messages.
+- Written with go/scanner and goyacc. \
+    This vastly reduces code size (and therefore vulnerabilities to bugs)
+    and creates super-fast code.
+- High test coverage (including lots of special cases).\
+  Also tested on 32 and 64bit architectures, where some (documented) operations like a bitwise-not can behave differently depending on the size of `int`. 
 
 
