@@ -3,9 +3,10 @@ package internal
 import (
 	"errors"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"strconv"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_Literals_Simple(t *testing.T) {
@@ -1437,6 +1438,15 @@ func Test_InvalidFunctionCalls(t *testing.T) {
 	assertEvalErrorFuncs(t, vars, functions, "syntax error: unexpected $end", `func(`)
 	assertEvalErrorFuncs(t, vars, functions, "syntax error: unexpected ')'", `func)`)
 	assertEvalErrorFuncs(t, vars, functions, "syntax error: unexpected ','", `func((1, 2))`)
+}
+
+func Test_Ternary(t *testing.T) {
+	vars := map[string]interface{}{"a": 0, "b": 2}
+	assertEvaluation(t, nil, 1, "true ? 1 : 2")
+	assertEvaluation(t, nil, 2, "false ? 1 : 2")
+	assertEvaluation(t, vars, 2, "(a>=b) ? 1 : 2")
+	assertEvaluation(t, vars, 2, "(a==4) ? 1 : 2")
+	assertEvaluation(t, vars, 2, "1==4 ? 1 : 2")
 }
 
 func assertEvaluation(t *testing.T, variables map[string]interface{}, expected interface{}, str string) {
