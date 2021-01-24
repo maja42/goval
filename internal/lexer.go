@@ -196,6 +196,14 @@ func (l *Lexer) Lex(lval *yySymType) int {
 		tokenType = int(tok.String()[0])
 
 	case token.ILLEGAL:
+		if lit == "?" {
+			tokenType = int('?')
+			break
+		}
+		if lit == ":" {
+			tokenType = int(':')
+			break
+		}
 		if lit == "~" {
 			tokenType = BIT_NOT
 			break
