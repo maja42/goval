@@ -43,7 +43,7 @@ package internal
 
 /* Operator precedence is taken from C/C++: http://en.cppreference.com/w/c/language/operator_precedence */
 
-%left  '?' ':'
+%right '?' ':'
 %left  OR
 %left  AND
 %left  '|'

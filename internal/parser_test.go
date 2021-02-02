@@ -1481,6 +1481,10 @@ func Test_Ternary_Nesting(t *testing.T) {
 	assertEvaluation(t, nil, 4, "false ? (true ? 1 : 2) : (false ? 3:4)")
 }
 
+func Test_Ternary_RightAssociativity(t *testing.T) {
+	assertEvaluation(t, nil, 2, "false ? 1 : true ? 2 : false ? 3 : 4") // In case of left-associativity, this would not compile (1 is not a boolean)
+}
+
 func Test_Ternary_NoShortCircuit(t *testing.T) {
 	var func1Calls, func2Calls int
 
