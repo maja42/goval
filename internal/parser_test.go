@@ -1440,16 +1440,87 @@ func Test_InvalidFunctionCalls(t *testing.T) {
 	assertEvalErrorFuncs(t, vars, functions, "syntax error: unexpected ','", `func((1, 2))`)
 }
 
-func Test_Ternary(t *testing.T) {
-	vars := map[string]interface{}{"a": 0, "b": 2}
-	assertEvaluation(t, nil, 1, "true ? 1 : 2")
-	assertEvaluation(t, nil, 2, "false ? 1 : 2")
-	assertEvaluation(t, vars, 2, "(a>=b) ? 1 : 2")
-	assertEvaluation(t, vars, 2, "(a==4) ? 1 : 2")
-	assertEvaluation(t, vars, 2, "1==4 ? 1 : 2")
+func Test_Ternary_Simple(t *testing.T) {
+	assertEvaluation(t, nil, 1, `true ? 1 : 2`)
+	assertEvaluation(t, nil, 2, `false ? 1 : 2`)
+
+	assertEvaluation(t, nil, 2, `!true ? 1 : 2`)
+	assertEvaluation(t, nil, 1, `!false ? 1 : 2`)
+
+	assertEvaluation(t, nil, 1, `4==4 ? 1 : 2`)
+	assertEvaluation(t, nil, 2, `1==4 ? 1 : 2`)
+
+	assertEvaluation(t, nil, 2, `!(4==4) ? 1 : 2`)
+	assertEvaluation(t, nil, 1, `!(1==4) ? 1 : 2`)
+
+	assertEvaluation(t, nil, 1, `((4==4) ? (1) : (2))`)
+	assertEvaluation(t, nil, 2, `((1==4) ? (1) : (2))`)
+}
+
+func Test_Ternary_TypeMix(t *testing.T) {
+	assertEvaluation(t, nil, "a", `true ? "a" : 1.5`)
+	assertEvaluation(t, nil, 1.5, `false ? "a" : 1.5`)
+
+	assertEvaluation(t, nil, []interface{}{42}, `true ? [42] : {"a":"b"}`)
+	assertEvaluation(t, nil, map[string]interface{}{"a": "b"}, `false ? [42] : {"a":"b"}`)
+
+	assertEvaluation(t, nil, map[string]interface{}{"a": "b"}, `true ? {"a":"b"} : [42]`)
+	assertEvaluation(t, nil, []interface{}{42}, `false ? {"a":"b"} : [42]`)
+
+	assertEvaluation(t, nil, 1, `"a" == "a" ? 1 : 2`)
+	assertEvaluation(t, nil, 2, `"a" == "b" ? 1 : 2`)
+
+	assertEvaluation(t, nil, 1, `2 IN [1,2,3] ? 1 : 2`)
+	assertEvaluation(t, nil, 2, `2 IN [4,5,6] ? 1 : 2`)
+}
+
+func Test_Ternary_Nesting(t *testing.T) {
+	assertEvaluation(t, nil, 1, "true ? (true ? 1 : 2) : (true ? 3:4)")
+	assertEvaluation(t, nil, 2, "true ? (false ? 1 : 2) : (true ? 3:4)")
+	assertEvaluation(t, nil, 3, "false ? (true ? 1 : 2) : (true ? 3:4)")
+	assertEvaluation(t, nil, 4, "false ? (true ? 1 : 2) : (false ? 3:4)")
+}
+
+func Test_Ternary_NoShortCircuit(t *testing.T) {
+	var func1Calls, func2Calls int
+
+	functions := map[string]ExpressionFunction{
+		"func1": func(args ...interface{}) (interface{}, error) {
+			func1Calls++
+			return 1, nil
+		},
+		"func2": func(args ...interface{}) (interface{}, error) {
+			func2Calls++
+			return 2, nil
+		},
+	}
+
+	assertEvaluationFuncs(t, nil, functions, 1, `true ? func1() : func2()`)
+	assert.Equal(t, 1, func1Calls)
+	assert.Equal(t, 1, func2Calls)
+
+	assertEvaluationFuncs(t, nil, functions, 2, `false ? func1() : func2()`)
+	assert.Equal(t, 2, func1Calls)
+	assert.Equal(t, 2, func2Calls)
+}
+
+func Test_Ternary_InvalidSyntax(t *testing.T) {
+	assertEvalError(t, nil, `syntax error: unexpected $end`, `true ? 1 :`)
+	assertEvalError(t, nil, `syntax error: unexpected ':'`, `true ? : 2`)
+	assertEvalError(t, nil, `syntax error: unexpected '?'`, `? 1 : 2`)
+
+	assertEvalError(t, nil, `syntax error: unexpected $end`, `true ?`)
+	assertEvalError(t, nil, `syntax error: unexpected ':'`, `true : 1 ? 2`)
+}
+
+func Test_Ternary_InvalidTypes(t *testing.T) {
+	assertEvalError(t, nil, `type error: required bool, but was string`, `"text" ? "a" : 1.5`)
+	assertEvalError(t, nil, `type error: required bool, but was number`, `0 ? "a" : 1.5`)
+	assertEvalError(t, nil, `type error: required bool, but was nil`, `nil ? "a" : 1.5`)
 }
 
 func assertEvaluation(t *testing.T, variables map[string]interface{}, expected interface{}, str string) {
+	t.Helper()
 	result, err := Evaluate(str, variables, nil)
 	if assert.NoError(t, err) {
 		assert.Equal(t, expected, result)
@@ -1457,6 +1528,7 @@ func assertEvaluation(t *testing.T, variables map[string]interface{}, expected i
 }
 
 func assertEvaluationFuncs(t *testing.T, variables map[string]interface{}, functions map[string]ExpressionFunction, expected interface{}, str string) {
+	t.Helper()
 	result, err := Evaluate(str, variables, functions)
 	if assert.NoError(t, err) {
 		assert.Equal(t, expected, result)
@@ -1464,10 +1536,12 @@ func assertEvaluationFuncs(t *testing.T, variables map[string]interface{}, funct
 }
 
 func assertEvalError(t *testing.T, variables map[string]interface{}, expectedErr string, str string) {
+	t.Helper()
 	assertEvalErrorFuncs(t, variables, nil, expectedErr, str)
 }
 
 func assertEvalErrorFuncs(t *testing.T, variables map[string]interface{}, functions map[string]ExpressionFunction, expectedErr string, str string) {
+	t.Helper()
 	result, err := Evaluate(str, variables, functions)
 	if assert.Error(t, err) {
 		assert.Equal(t, expectedErr, err.Error())

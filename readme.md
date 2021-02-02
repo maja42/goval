@@ -307,6 +307,32 @@ Examples:
 !varName
 ```
 
+
+### Ternary `? :`
+
+If the expression resolves to `true`, the operator resolves to the left operand. \
+If the expression resolves to `false`, the operator resolves to the right operand.
+
+Examples:
+
+```
+true  ? 1 : 2                         // 1
+false ? 1 : 2                         // 2
+	
+2 < 5  ? "a" : 1.5                    // "a"
+9 > 12 ? "a" : [42]                   // [42]
+
+false ? (true ? 1:2) : (true ? 3:4)   // 3
+```
+
+
+Note that all operands are resolved (no short-circuiting). 
+In the following example, both functions are called (the return value of `func2` is simply ignored):
+
+```
+true ? func1() : func2()
+```
+
 ### Bit Manipulation
 
 #### Logical Or `|`, Logical And `&`, Logical XOr `^`
