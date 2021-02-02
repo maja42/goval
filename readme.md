@@ -8,27 +8,25 @@ goval
 
 
 This library allows programs to evaluate arbitrary arithmetic/string/logic expressions.
-Custom extensions like variable access and function calls are supported.
+Accessing variables and calling custom functions is supported.
 
-
-This project is considered stable and will not receive any new significant features.
-If new (major) features are required, they are likely to be integrated in a separate project instead.
-
-However, please use the issue-tracker for any questions, feedback and bug-reports.
-
-
+This project is considered stable and already used in production systems. \
+Please use the issue-tracker for any questions, feedback and bug-reports.
 
 This project is licensed under the terms of the MIT license.
 
 # Demo
 
-A small demo that evaluates expressions given from stdin can be found in the example folder:
+A small CLI demo that evaluates expressions can be found in the example folder:
 
 ```
 go get -u github.com/maja42/goval
 cd $GOPATH/src/github.com/maja42/goval/
 go run example/main.go
 ```
+
+![Demo](goval.gif)
+
 
 # Usage
 
@@ -43,14 +41,17 @@ Accessing variables:
 ```go
 eval := goval.NewEvaluator()
 variables := map[string]interface{}{
-    "os": runtime.GOOS,
-    "arch": runtime.GOARCH,
+    "uploaded": 146,
+    "total":  400,
 }
-result, err := eval.Evaluate(`os + "/" + arch`, variables, nil) // Returns <"linux/amd64", nil>
+result, err := eval.Evaluate(`uploaded * 100 / total`, variables, nil)  // Returns <36, nil>
 ```
 
+
 Calling functions:
+
 ```go
+// Implementing strlen()
 eval := goval.NewEvaluator()
 variables := map[string]interface{}{
     "os":   runtime.GOOS,
@@ -65,6 +66,23 @@ functions["strlen"] = func(args ...interface{}) (interface{}, error) {
 
 result, err := eval.Evaluate(`strlen(arch[:2]) + strlen("text")`, variables, functions) // Returns <6, nil>
 ```
+
+Custom functions allow the extension with arbitrary features like regex-matching:
+```go
+// Implementing regular expressions (error handling omitted)
+functions := make(map[string]goval.ExpressionFunction)
+functions["matches"] = func(args ...interface{}) (interface{}, error) {
+    str := args[0].(string)
+    exp := args[1].(string)
+    reg := regexp.MustCompile(exp)
+    return reg.MatchString(str), nil
+}
+
+eval.Evaluate(`matches("text", "[a-z]+")`, nil, functions)  // Returns <true, nil>
+eval.Evaluate(`matches("1234", "[a-z]+")`, nil, functions)  // Returns <false, nil>
+```
+
+
 
 # Documentation
 
@@ -469,22 +487,27 @@ arr[3:4]  // [3]
 
 If you are looking for a generic evaluation library, 
 you can also take a look at [Knetic/govaluate](https://github.com/Knetic/govaluate).
-I used that library myself, but due to a few shortcomings I decided to create goval. 
+I used that library myself, but due to a several shortcomings I decided to create goval. 
 The main differences are:
 
-- Full support for arrays and objects.
-- Accessing variables (maps) via `.` and `[]` syntax
-- Support for array- and object concatenation.
-- Array literals with `[]` as well as object literals with `{}`
-- Opaque differentiation between `int` and `float64`. \
-  The underlying type is automatically converted as long as no precision is lost.
-- Type-aware bit-operations (they only work with `int`-numbers).
+- More intuitive syntax
+- No intermediate AST - evaluation and parsing happens in a single step  
+- Better type support:  
+    - Full support for arrays and objects.
+    - Opaque differentiation between `int` and `float64`. \
+      The underlying type is automatically converted as long as no precision is lost.
+    - Type-aware bit-operations (they only work with `int`-numbers).
+    - No support for dates (strings are just strings, they don't have a special meaning, even if they look like dates).\
+      Support for dates and structs *could* be added if needed.
+- More operators:      
+    - Accessing variables (maps) via `.` and `[]` syntax
+    - Support for array- and object concatenation.
+    - Slicing and substrings
 - Hex-Literals (useful as soon as bit-operations are involved).
-- No support for dates (strings are just strings, they don't have a special meaning, even if they look like dates).\
-  Support for dates and structs *could* be added if needed.
+- Array literals with `[]` as well as object literals with `{}`
 - Useful error messages.
-- Written with go/scanner and goyacc. \
-    This vastly reduces code size (and therefore vulnerabilities to bugs)
+- Highly optimized parser code by using go/scanner and goyacc. \
+    This leads to vastly reduced code size (and therefore little bug potential)
     and creates super-fast code.
 - High test coverage (including lots of special cases).\
   Also tested on 32 and 64bit architectures, where some (documented) operations like a bitwise-not can behave differently depending on the size of `int`. 
