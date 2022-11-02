@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"reflect"
+	"runtime"
 	"strconv"
 )
 
@@ -497,9 +498,30 @@ func callFunction(functions map[string]ExpressionFunction, name string, args []i
 		panic(fmt.Errorf("syntax error: no such function %q", name))
 	}
 
-	res, err := f(args...)
+	res, err := callAndRecover(f, args)
 	if err != nil {
-		panic(fmt.Errorf("function error: %q - %s", name, err))
+		panic(fmt.Errorf("function error: %q - %w", name, err))
 	}
 	return res
+}
+
+func callAndRecover(f ExpressionFunction, args []interface{}) (_ interface{}, retErr error) {
+	defer func() {
+		r := recover()
+		if r == nil {
+			return
+		}
+
+		_, ok := r.(runtime.Error)
+		if ok {
+			panic(r)
+		}
+
+		if err, ok := r.(error); ok {
+			retErr = err
+		} else {
+			retErr = fmt.Errorf("panic: %v", r)
+		}
+	}()
+	return f(args...)
 }

@@ -195,6 +195,9 @@ func (l *Lexer) Lex(lval *yySymType) int {
 		token.LPAREN, token.RPAREN:
 		tokenType = int(tok.String()[0])
 
+	case token.TILDE:
+		tokenType = BIT_NOT
+
 	case token.ILLEGAL:
 		if lit == "?" {
 			tokenType = int('?')
@@ -204,7 +207,7 @@ func (l *Lexer) Lex(lval *yySymType) int {
 			tokenType = int(':')
 			break
 		}
-		if lit == "~" {
+		if lit == "~" { // for backwards compatibility with old go versions where token.TILDE did not exist yet
 			tokenType = BIT_NOT
 			break
 		}

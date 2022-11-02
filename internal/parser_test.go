@@ -1361,9 +1361,6 @@ func Test_FunctionCall_Simple(t *testing.T) {
 		"func3": func(args ...interface{}) (interface{}, error) {
 			return []interface{}{len(args), args}, nil
 		},
-		"func4": func(args ...interface{}) (interface{}, error) {
-			return nil, errors.New("simulated error")
-		},
 	}
 
 	tests := map[string]interface{}{`nil`: nil, `true`: true, `false`: false, `42`: 42, `4.2`: 4.2, `"text"`: "text", `"0"`: "0"}
@@ -1377,8 +1374,6 @@ func Test_FunctionCall_Simple(t *testing.T) {
 
 	expectedReturn := []interface{}{6, []interface{}{true, false, 42, 4.2, "text", "0"}}
 	assertEvaluationFuncs(t, nil, functions, expectedReturn, `func3(true, false, 42, 4.2, "text", "0")`)
-
-	assertEvalErrorFuncs(t, nil, functions, "function error: \"func4\" - simulated error", "func4()")
 }
 
 func Test_FunctionCall_Nested(t *testing.T) {
@@ -1424,6 +1419,37 @@ func Test_FunctionCall_Variables(t *testing.T) {
 	// function with same name as variable:
 	vars["func"] = "foo"
 	assertEvaluationFuncs(t, vars, functions, "foo", `func("func", func)`)
+}
+
+func Test_FunctionCall_Errors(t *testing.T) {
+	// panic(error) should be indistinguishable from returning an error
+	functions := map[string]ExpressionFunction{
+		"func1": func(args ...interface{}) (interface{}, error) {
+			return nil, errors.New("simulated error")
+		},
+		"func2": func(args ...interface{}) (interface{}, error) {
+			panic(errors.New("simulated error"))
+		},
+		"func3": func(args ...interface{}) (interface{}, error) {
+			panic("error string")
+		},
+		"func4": func(args ...interface{}) (interface{}, error) {
+			panic(42)
+		},
+		"func5": func(args ...interface{}) (interface{}, error) {
+			var s []int
+			return s[1], nil // runtime panic
+		},
+	}
+
+	assertEvalErrorFuncs(t, nil, functions, "function error: \"func1\" - simulated error", "func1()")
+	assertEvalErrorFuncs(t, nil, functions, "function error: \"func2\" - simulated error", "func2()")
+	assertEvalErrorFuncs(t, nil, functions, "function error: \"func3\" - panic: error string", "func3()")
+	assertEvalErrorFuncs(t, nil, functions, "function error: \"func4\" - panic: 42", "func4()")
+
+	assert.Panics(t, func() {
+		_, _ = Evaluate("func5()", nil, functions)
+	})
 }
 
 func Test_InvalidFunctionCalls(t *testing.T) {
