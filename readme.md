@@ -206,6 +206,20 @@ Examples:
 24.0 / 10           // 2.4
 ```
 
+#### Power `**`
+
+If both sides are integers, and the result can be represented as an integer, the resulting value is also an integer.
+Otherwise, the result will be a floating point number.
+
+Examples:
+
+```
+2 ** 4              // 16
+10 ** 3             // 1000
+10 ** -6            // 0.000001
+2.5 ** -2.5         // 0.10119...
+```
+
 #### Modulo `%`
 
 If both sides are integers, the resulting value is also an integer.

@@ -97,6 +97,7 @@ math
   | expr '-' expr         { $$ = sub($1, $3) }
   | expr '*' expr         { $$ = mul($1, $3) }
   | expr '/' expr         { $$ = div($1, $3) }
+  | expr '*' '*' expr     { $$ = pow($1, $4) }
   | expr '%' expr         { $$ = mod($1, $3) }
   ;
 

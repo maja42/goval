@@ -225,6 +225,37 @@ func div(val1 interface{}, val2 interface{}) interface{} {
 	panic(fmt.Errorf("type error: cannot divide type %s and %s", typeOf(val1), typeOf(val2)))
 }
 
+func pow(val1 interface{}, val2 interface{}) interface{} {
+	var float1, float2 float64
+
+	int1, int1OK := val1.(int)
+	int2, int2OK := val2.(int)
+
+	var ok bool
+	if int1OK {
+		float1 = float64(int1)
+	} else {
+		if float1, ok = val1.(float64); !ok {
+			panic(fmt.Errorf("type error: cannot multiply type %s and %s", typeOf(val1), typeOf(val2)))
+		}
+	}
+	if int2OK {
+		float2 = float64(int2)
+	} else {
+		if float2, ok = val2.(float64); !ok {
+			panic(fmt.Errorf("type error: cannot multiply type %s and %s", typeOf(val1), typeOf(val2)))
+		}
+	}
+	res := math.Pow(float1, float2)
+	if int1OK && int2OK { // If both inputs are integers, also return an integer, unless the result is not representable as such
+		intRes := int(res)
+		if float64(intRes) == res {
+			return intRes
+		}
+	}
+	return res
+}
+
 func mod(val1 interface{}, val2 interface{}) interface{} {
 	int1, int1OK := val1.(int)
 	int2, int2OK := val2.(int)

@@ -3,6 +3,7 @@ package internal
 import (
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"testing"
 
@@ -403,6 +404,36 @@ func Test_Arithmetic_Divide(t *testing.T) {
 
 	assertEvaluation(t, nil, 2, "144 / 12 / 6")
 	assertEvaluation(t, nil, 1.2/2.5/3, "1.2 / 2.5 / 3")
+}
+
+func Test_Arithmetic_Power(t *testing.T) {
+	// int ** int -> int
+	assertEvaluation(t, nil, 16, "4 ** 2")
+	assertEvaluation(t, nil, 16, "2 ** 4")
+	assertEvaluation(t, nil, 0, "0 ** 4")
+	assertEvaluation(t, nil, 16, "-2 ** 4")
+	assertEvaluation(t, nil, -32, "-2 ** 5")
+	assertEvaluation(t, nil, 1000000, "10 ** 6")
+	assertEvaluation(t, nil, 1, "0 ** 0")
+	assertEvaluation(t, nil, 1, "10 ** 0")
+	// int ** int -> float
+	assertEvaluation(t, nil, float64(1e32), "10 ** 32")
+	assertEvaluation(t, nil, 0.000001, "10 ** -6")
+	assertEvaluation(t, nil, 0.0625, "-2 ** -4")
+	assertEvaluation(t, nil, -0.03125, "-2 ** -5")
+
+	// with float
+	assertEvaluation(t, nil, math.Pow(5, 2.5), "5 ** 2.5")
+	assertEvaluation(t, nil, math.Pow(2.5, 2), "2.5 ** 2")
+	assertEvaluation(t, nil, math.Pow(2.42, -1), "2.42 ** -1")
+	assertEvaluation(t, nil, math.Pow(2.42, 0.1), "2.42 ** 0.1")
+	assertEvaluation(t, nil, math.Pow(0.1, 4), "0.1 ** 4")
+
+	assertEvaluation(t, nil, 8*8*8*8, "2 ** 3 ** 4")
+	assertEvaluation(t, nil, math.Pow(0.1, 3), "10 ** -1 ** 3")
+
+	// With space
+	assertEvaluation(t, nil, 16, "4 * * 2")
 }
 
 func Test_Arithmetic_Modulo(t *testing.T) {
