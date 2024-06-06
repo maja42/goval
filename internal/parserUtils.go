@@ -426,9 +426,39 @@ func accessVar(variables map[string]interface{}, varName string) interface{} {
 	return val
 }
 
+func handleArrayAccess(s interface{}, field interface{}) interface{} {
+	intIdx, ok := field.(int)
+	if !ok {
+		floatIdx, ok := field.(float64)
+		if !ok {
+			panic(fmt.Errorf("syntax error: array index must be number, but was %s", typeOf(field)))
+		}
+		intIdx = int(floatIdx)
+		if float64(intIdx) != floatIdx {
+			panic(fmt.Errorf("eval error: array index must be whole number, but was %f", floatIdx))
+		}
+	}
+
+	switch arr := s.(type) {
+	case []interface{}:
+		if intIdx < 0 || intIdx >= len(arr) {
+			panic(fmt.Errorf("var error: array index %d is out of range [%d, %d]", intIdx, 0, len(arr)))
+		}
+		return arr[intIdx]
+	case []map[string]interface{}:
+		if intIdx < 0 || intIdx >= len(arr) {
+			panic(fmt.Errorf("var error: array index %d is out of range [%d, %d]", intIdx, 0, len(arr)))
+		}
+		return arr[intIdx]
+	default:
+		panic(fmt.Errorf("syntax error: array must be of type []interface{} or []map[string]interface{}, but was %s", typeOf(s)))
+	}
+}
+
 func accessField(s interface{}, field interface{}) interface{} {
-	obj, ok := s.(map[string]interface{})
-	if ok {
+	switch s.(type) {
+	case map[string]interface{}:
+		obj := s.(map[string]interface{})
 		key, ok := field.(string)
 		if !ok {
 			panic(fmt.Errorf("syntax error: object key must be string, but was %s", typeOf(field)))
@@ -438,26 +468,9 @@ func accessField(s interface{}, field interface{}) interface{} {
 			panic(fmt.Errorf("var error: object has no member %q", field))
 		}
 		return val
-	}
 
-	arrVar, ok := s.([]interface{})
-	if ok {
-		intIdx, ok := field.(int)
-		if !ok {
-			floatIdx, ok := field.(float64)
-			if !ok {
-				panic(fmt.Errorf("syntax error: array index must be number, but was %s", typeOf(field)))
-			}
-			intIdx = int(floatIdx)
-			if float64(intIdx) != floatIdx {
-				panic(fmt.Errorf("eval error: array index must be whole number, but was %f", floatIdx))
-			}
-		}
-
-		if intIdx < 0 || intIdx >= len(arrVar) {
-			panic(fmt.Errorf("var error: array index %d is out of range [%d, %d]", intIdx, 0, len(arrVar)))
-		}
-		return arrVar[intIdx]
+	case []interface{}, []map[string]interface{}:
+		return handleArrayAccess(s, field)
 	}
 
 	panic(fmt.Errorf("syntax error: cannot access fields on type %s", typeOf(s)))
