@@ -96,7 +96,9 @@ func (l *Lexer) Lex(lval *yySymType) int {
 			hexVal, err = strconv.ParseUint(hex, 16, BitSizeOfInt)
 			tokenInfo.value = int(hexVal)
 		} else {
-			tokenInfo.value, err = strconv.Atoi(lit)
+			var n int64
+			n, err = strconv.ParseInt(lit, 0, BitSizeOfInt)
+			tokenInfo.value = int(n)
 		}
 		if err != nil {
 			l.Perrorf(pos, "parse error: cannot parse integer")
