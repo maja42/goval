@@ -307,7 +307,7 @@ Examples:
 
 ```
 3 <-4        // false
-45 > 3.4     // false
+45 > 3.4     // true
 -4 <= -1     // true
 3.5 >= 3.5   // true
 ```
