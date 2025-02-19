@@ -17,6 +17,8 @@ func Test_Literals_Simple(t *testing.T) {
 	assertEvaluation(t, nil, false, "false")
 
 	assertEvaluation(t, nil, 42, "42")
+	assertEvaluation(t, nil, 4000, "4_000")
+	assertEvaluation(t, nil, 4000, "4_0_0_0")
 
 	assertEvaluation(t, nil, 4.2, "4.2")
 	assertEvaluation(t, nil, 42.0, "42.0")
@@ -43,42 +45,43 @@ func Test_Literals_Hex(t *testing.T) {
 	assertEvaluation(t, nil, 255, "0xFF")
 	assertEvaluation(t, nil, 42330, "0xA55A")
 	assertEvaluation(t, nil, 23205, "0x5AA5")
-	assertEvaluation(t, nil, 65535, "0xFFFF") // 16bit
+	assertEvaluation(t, nil, 65535, "0xFFFF")  // 16bit
+	assertEvaluation(t, nil, 65535, "0xFF_FF") // 16bit
 
-	result, err := Evaluate("0x7FFFFFFF", nil, nil) // 32bit, leading zero
+	result, err := Evaluate("0x7FFF_FFFF", nil, nil) // 32bit, leading zero
 	if assert.NoError(t, err) {
 		assert.Equal(t, int64(2147483647), int64(result.(int)))
 	}
 
 	if BitSizeOfInt == 32 {
-		result, err = Evaluate("0x80000000", nil, nil) // 32bit, leading one (highest negative)
+		result, err = Evaluate("0x8000_0000", nil, nil) // 32bit, leading one (highest negative)
 		if assert.NoError(t, err) {
 			assert.Equal(t, int32(-2147483648), int32(result.(int)))
 		}
 
-		result, err = Evaluate("0xFFFFFFFF", nil, nil) // 32bit, leading one (lowest negative)
+		result, err = Evaluate("0xFFFF_FFFF", nil, nil) // 32bit, leading one (lowest negative)
 		if assert.NoError(t, err) {
 			assert.Equal(t, int32(-1), int32(result.(int)))
 		}
 	}
 
 	if BitSizeOfInt >= 64 {
-		result, err = Evaluate("0xFFFFFFFF", nil, nil) // 32bit
+		result, err = Evaluate("0xFFFF_FFFF", nil, nil) // 32bit
 		if assert.NoError(t, err) {
 			assert.Equal(t, int64(4294967295), int64(result.(int)))
 		}
 
-		result, err = Evaluate("0x7FFFFFFFFFFFFFFF", nil, nil) // 64bit, leading zero (highest positive)
+		result, err = Evaluate("0x7FFF_FFFF_FFFF_FFFF", nil, nil) // 64bit, leading zero (highest positive)
 		if assert.NoError(t, err) {
 			assert.Equal(t, int64(9223372036854775807), int64(result.(int)))
 		}
 
-		result, err = Evaluate("0x8000000000000000", nil, nil) // 64bit, leading one (highest negative)
+		result, err = Evaluate("0x8000_0000_0000_0000", nil, nil) // 64bit, leading one (highest negative)
 		if assert.NoError(t, err) {
 			assert.Equal(t, int64(-9223372036854775808), int64(result.(int)))
 		}
 
-		result, err = Evaluate("0xFFFFFFFFFFFFFFFF", nil, nil) // 64bit, leading one (lowest negative)
+		result, err = Evaluate("0xFFFF_FFFF_FFFF_FFFF", nil, nil) // 64bit, leading one (lowest negative)
 		if assert.NoError(t, err) {
 			assert.Equal(t, int64(-1), int64(result.(int)))
 		}

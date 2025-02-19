@@ -90,10 +90,9 @@ func (l *Lexer) Lex(lval *yySymType) int {
 
 	case token.INT:
 		tokenType = LITERAL_NUMBER
-		hex := strings.TrimPrefix(lit, "0x")
-		if len(hex) < len(lit) {
+		if strings.HasPrefix(lit, "0x") {
 			var hexVal uint64
-			hexVal, err = strconv.ParseUint(hex, 16, BitSizeOfInt)
+			hexVal, err = strconv.ParseUint(lit, 0, BitSizeOfInt)
 			tokenInfo.value = int(hexVal)
 		} else {
 			var n int64
