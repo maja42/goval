@@ -390,20 +390,34 @@ func Test_Arithmetic_Multiply(t *testing.T) {
 }
 
 func Test_Arithmetic_Divide(t *testing.T) {
+	vars := map[string]interface{}{
+		"zeroi": 0,
+		"zerof": 0.0,
+	}
+
 	// int / int
 	assertEvaluation(t, nil, 1, "4 / 3")
 	assertEvaluation(t, nil, 3, "12 / 4")
 	assertEvaluation(t, nil, -2, "-4 / 2")
 	assertEvaluation(t, nil, 2, "-4 / -2")
+	assertEvalError(t, nil, "math error: cannot divide by zero", `1 / 0`)
+	assertEvalError(t, vars, "math error: cannot divide by zero", `-1 / zeroi`)
+
 	// float / float
 	assertEvaluation(t, nil, 2.75, "5.5 / 2.0")
 	assertEvaluation(t, nil, 3.0, "12.0 / 4.0")
 	assertEvaluation(t, nil, -2/4.5, "-2.0 / 4.5")
 	assertEvaluation(t, nil, 2/4.5, "-2.0 / -4.5")
+	assertEvalError(t, nil, "math error: cannot divide by zero", `1.0 / 0`)
+	assertEvalError(t, vars, "math error: cannot divide by zero", `-1.0 / zerof`)
+
 	// int / float
 	assertEvaluation(t, nil, 2/4.5, "2 / 4.5")
+	assertEvalError(t, nil, "math error: cannot divide by zero", `1 / 0.0`)
+
 	// float / int
 	assertEvaluation(t, nil, 2.75, "5.5 / 2")
+	assertEvalError(t, nil, "math error: cannot divide by zero", `1.0 / 0`)
 
 	assertEvaluation(t, nil, 2, "144 / 12 / 6")
 	assertEvaluation(t, nil, 1.2/2.5/3, "1.2 / 2.5 / 3")

@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"reflect"
@@ -204,6 +205,9 @@ func div(val1 interface{}, val2 interface{}) interface{} {
 	int2, int2OK := val2.(int)
 
 	if int1OK && int2OK {
+		if int2 == 0 {
+			panic(errors.New("math error: cannot divide by zero"))
+		}
 		return int1 / int2
 	}
 
@@ -220,6 +224,9 @@ func div(val1 interface{}, val2 interface{}) interface{} {
 	}
 
 	if float1OK && float2OK {
+		if float2 == 0 {
+			panic(errors.New("math error: cannot divide by zero"))
+		}
 		return float1 / float2
 	}
 	panic(fmt.Errorf("type error: cannot divide type %s and %s", typeOf(val1), typeOf(val2)))
